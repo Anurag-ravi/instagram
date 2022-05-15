@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:instagram/components/followCard.dart';
 import 'package:instagram/components/highlightcard.dart';
 import 'package:instagram/pages/login.dart';
@@ -60,16 +61,11 @@ class _ProfileState extends State<Profile> {
         ),
         actions: <Widget>[
           IconButton(
-            onPressed: () {
-              // Navigator.pushNamed(context, '/newpost');
-            },
-            alignment: Alignment.center,
-            icon: Icon(
-              Icons.add_box_outlined,
-              color: Colors.black,
-              size: deviceWidth * 0.07,
-            ),
-          ),
+              onPressed: () { },
+              alignment: Alignment.center,
+              icon: SvgPicture.asset('assets/add.svg',
+                  height: deviceWidth * 0.09)
+              ),
           IconButton(
             onPressed: () {
               bottompopup(context);
@@ -456,9 +452,10 @@ void bottompopup(context) {
           child: Padding(
             padding: const EdgeInsets.fromLTRB(20, 8, 8, 8),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
+              crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.start,
               children: <Widget>[
+                
                 SizedBox(
                   height: MediaQuery.of(context).size.height * .03,
                 ),

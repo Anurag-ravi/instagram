@@ -163,8 +163,8 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
               IconButton(
                 onPressed: () {},
                 alignment: Alignment.topCenter,
-                icon: Image.asset(
-                  'assets/comment.png',
+                icon: SvgPicture.asset(
+                  'assets/comment.svg',
                   height: deviceWidth * 0.07,
                   width: deviceWidth * 0.07,
                 ),
@@ -172,8 +172,8 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
               IconButton(
                 onPressed: () {},
                 alignment: Alignment.topCenter,
-                icon: Image.asset(
-                  'assets/semd.png',
+                icon: SvgPicture.asset(
+                  'assets/send.svg',
                   height: deviceWidth * 0.07,
                   width: deviceWidth * 0.07,
                 ),
