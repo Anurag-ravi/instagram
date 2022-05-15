@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:instagram/screens/feed/activity.dart';
 import 'package:instagram/screens/feed/feed.dart';
+import 'package:instagram/screens/feed/profile.dart';
 
 class FeedScreen extends StatefulWidget {
   const FeedScreen({Key? key, required this.controller}) : super(key: key);
@@ -18,8 +20,8 @@ class _FeedScreenState extends State<FeedScreen> {
       body: currIndex == 0 ? Feed(controller: widget.controller) :
       currIndex == 1 ? Text('search') :
       currIndex == 2 ? Text('reel') :
-      currIndex == 3 ? Text('activity') :
-                       Text('profile'),
+      currIndex == 3 ? Activity() :
+                       Profile(),
       bottomNavigationBar: Container(
         height: deviceWidth * 0.18,
         child: BottomNavigationBar(
@@ -108,10 +110,10 @@ class _FeedScreenState extends State<FeedScreen> {
                 icon: Stack(
                   alignment: Alignment.center,
                   children: [
-                    CircleAvatar(
-                      radius: deviceWidth * 0.3,
-                      backgroundColor: Colors.black,
-                    ),
+                    // CircleAvatar(
+                    //   radius: deviceWidth * 0.25,
+                    //   backgroundColor: Colors.black,
+                    // ),
                     CircleAvatar(
                       radius: deviceWidth * 0.10,
                       backgroundImage: const AssetImage('assets/avatar.png')

@@ -14,6 +14,7 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
   late Animation<Matrix4> animation;
 
   bool isliked = false;
+  bool issaved = false;
   bool isheartanimated = false;
 
   @override
@@ -181,10 +182,29 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
                 width: deviceWidth * 0.45,
               ),
               IconButton(
-                onPressed: () {},
+                onPressed: () {
+                  setState(() {
+                    issaved = !issaved;
+                  });
+                  if (issaved){
+                    final snackbar = SnackBar(
+                      content: const Text('Saved to collection'),
+                      action: SnackBarAction(
+                        label: 'Undo',
+                        textColor: Colors.white,
+                        onPressed: () {
+                          setState(() {
+                            issaved = false;
+                          });
+                        },
+                        ),
+                      );
+                      ScaffoldMessenger.of(context).showSnackBar(snackbar);
+                  }
+                },
                 alignment: Alignment.topCenter,
                 icon: Image.asset(
-                  'assets/save.png',
+                  issaved ? 'assets/savee.png' : 'assets/save.png',
                   height: deviceWidth * 0.07,
                   width: deviceWidth * 0.07,
                 ),
