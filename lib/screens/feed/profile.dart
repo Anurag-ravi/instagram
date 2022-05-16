@@ -2,18 +2,23 @@
 
 import 'dart:convert';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:instagram/components/cacheimage.dart';
 import 'package:instagram/components/followCard.dart';
 import 'package:instagram/components/highlightcard.dart';
 import 'package:instagram/data.dart';
 import 'package:instagram/models/profile.dart';
+import 'package:instagram/models/profile_short.dart';
+import 'package:instagram/screens/profile/followers.dart';
 import 'package:instagram/utilities/logout.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 
 class Profile extends StatefulWidget {
-  const Profile({Key? key, required this.me, this.username = ''}) : super(key: key);
+  const Profile({Key? key, required this.me, this.username = ''})
+      : super(key: key);
   final bool me;
   final String username;
   @override
@@ -25,632 +30,796 @@ class _ProfileState extends State<Profile> {
   final controller = PageController(initialPage: 0);
   bool following = true;
   bool isvisible = false;
-  ProfileModel profile = ProfileModel(0, 'username', false, 0, 0, 0, 'name', 'bio', '', 0, [], false, [], []);
+  ProfileModel profile = ProfileModel(
+      0, 'username', false, 0, 0, 0, 'name', 'bio', '', 0, [], false, [], []);
 
   @override
-  void initState() async {
+  void initState() {
     // TODO: implement initState
+    fetch();
     super.initState();
-    if(widget.me){
+  }
+
+  Future<void> fetch() async {
+    if (widget.me) {
       SharedPreferences prefs = await SharedPreferences.getInstance();
-      String token = prefs.getString('token') as String;
-      final response = await http.post(
+      String token = prefs.getString('token').toString();
+      final response = await http.get(
         Uri.parse("${url}user/profile/"),
-        headers: <String, String>{
-            'Authorization': token
-        }
+        headers: {
+          "Authorization": token,
+        },
       );
-      var data = jsonDecode(response.body);
-      if(response.statusCode == 200){
-        profile = ProfileModel.fromJson(data);
+      var data = jsonDecode(jsonDecode(response.body));
+      if (response.statusCode == 200) {
+        setState(() {
+          profile = ProfileModel.fromJson(data);
+        });
+        settoken(response);
       }
-      if(response.statusCode == 401){
+      if (response.statusCode == 401) {
         logout(context);
       }
     } else {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       String token = prefs.getString('token') as String;
-      final response = await http.post(
-        Uri.parse("${url}user/profile/"),
-        headers: <String, String>{
-            'Authorization': token
-        },
-        body: jsonEncode({
-          "username": widget.username
-        })
-      );
-      var data = jsonDecode(response.body);
-      if(response.statusCode == 200){
-        settoken(response.headers['jwt']);
-        profile = ProfileModel.fromJson(data);
+      final response = await http.post(Uri.parse("${url}user/profile/"),
+          headers: <String, String>{'Authorization': token},
+          body: jsonEncode({"username": widget.username}));
+      var data = jsonDecode(jsonDecode(response.body));
+      if (response.statusCode == 200) {
+        setState(() {
+          profile = ProfileModel.fromJson(data);
+        });
+        settoken(response);
       }
-      if(response.statusCode == 401){
+      if (response.statusCode == 401) {
         logout(context);
       }
     }
   }
 
+  Future<void> follow() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? token = prefs.getString('token');
+      final response = await http.post(Uri.parse("${url}user/follow/"),
+          headers: <String, String>{'Authorization': token!},
+          body: jsonEncode({"username": widget.username}));
+      if (response.statusCode == 200) {
+        setState(() {
+          profile.meFollowing = !profile.meFollowing;
+        });
+        settoken(response);
+        return;
+      }
+      if (response.statusCode == 401) {
+        logout(context);
+        return;
+      }
+      const snackBar = SnackBar(
+      content: Text('Some Error occured 🥲'),
+      );
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+  }
 
   @override
   Widget build(BuildContext context) {
     double deviceWidth = MediaQuery.of(context).size.width;
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: const Color(0xfff8faf8),
-        elevation: 0.0,
-        centerTitle: false,
-        leading: widget.me
-            ? null
-            : IconButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-                icon: Icon(
-                  Icons.arrow_back,
-                  color: Colors.black,
-                )),
-        title: SizedBox(
-          height: deviceWidth * 0.12,
-          child: Column(
-            children: [
-              SizedBox(
-                height: deviceWidth * .02,
-              ),
-              Row(
-                children: [
-                  Flexible(
-                    child: Text(
-                      profile.username,
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontWeight: FontWeight.w700,
-                        fontFamily: 'arial',
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                  profile.verified
-                      ? Icon(
-                          Icons.verified,
-                          color: Colors.blue,
-                          size: deviceWidth * 0.06,
-                        )
-                      : widget.me
-                          ? Icon(
-                              Icons.keyboard_arrow_down,
-                              color: Colors.black,
-                              size: deviceWidth * 0.07,
-                            )
-                          : Container(),
-                ],
-              ),
-            ],
-          ),
-        ),
-        actions: <Widget>[
-          IconButton(
-            onPressed: () {
-              bottompopup1(context);
-            },
-            alignment: Alignment.center,
-            icon: widget.me
-                ? SvgPicture.asset('assets/add.svg', height: deviceWidth * 0.09)
-                : Icon(
-                    Icons.notifications_none_outlined,
+    return RefreshIndicator(
+      color: Colors.black,
+      onRefresh: fetch,
+      child: Scaffold(
+        appBar: AppBar(
+          backgroundColor: const Color(0xfff8faf8),
+          elevation: 0.5,
+          centerTitle: false,
+          leading: widget.me
+              ? null
+              : IconButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  icon: Icon(
+                    Icons.arrow_back,
                     color: Colors.black,
-                    size: deviceWidth * 0.09,
-                  ),
-          ),
-          IconButton(
-            onPressed: () {
-              widget.me ? bottompopup(context) : bottompopup2(context);
-            },
-            alignment: Alignment.center,
-            icon: widget.me
-                ? Icon(
-                    Icons.menu_outlined,
-                    color: Colors.black,
-                    size: deviceWidth * 0.09,
-                  )
-                : Icon(
-                    Icons.more_vert,
-                    color: Colors.black,
-                    size: deviceWidth * 0.09,
-                  ),
-          ),
-        ],
-      ),
-      body: ListView(
-        children: [
-          SizedBox(
-            height: deviceWidth * .01,
-          ),
-          Row(
-            children: [
-              SizedBox(
-                width: deviceWidth * 0.045,
-              ),
-              SizedBox(
-                height: deviceWidth * .26,
-              ),
-              CircleAvatar(
-                backgroundImage: profile.dp == '' ? NetworkImage(profile.dp) as ImageProvider<Object> : AssetImage('assets/avatar.png'),
-                radius: deviceWidth * 0.12,
-              ),
-              SizedBox(
-                width: deviceWidth * .1,
-              ),
-              Column(
-                children: <Widget>[
-                  Text(
-                    '5',
-                    style: TextStyle(
-                      fontSize: deviceWidth * .05,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  SizedBox(
-                    height: deviceWidth * .01,
-                  ),
-                  Text(
-                    'Posts',
-                    style: TextStyle(
-                      fontSize: deviceWidth * .04,
-                      fontWeight: FontWeight.w300,
-                    ),
-                  ),
-                ],
-              ),
-              SizedBox(
-                width: deviceWidth * .04,
-              ),
-              Column(
-                children: <Widget>[
-                  Text(
-                    '500',
-                    style: TextStyle(
-                      fontSize: deviceWidth * .05,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  SizedBox(
-                    height: deviceWidth * .01,
-                  ),
-                  Text(
-                    'Followers',
-                    style: TextStyle(
-                      fontSize: deviceWidth * .04,
-                      fontWeight: FontWeight.w300,
-                    ),
-                  ),
-                ],
-              ),
-              SizedBox(
-                width: deviceWidth * .04,
-              ),
-              Column(
-                children: <Widget>[
-                  Text(
-                    '496',
-                    style: TextStyle(
-                      fontSize: deviceWidth * .05,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  SizedBox(
-                    height: deviceWidth * .01,
-                  ),
-                  Text(
-                    'Following',
-                    style: TextStyle(
-                      fontSize: deviceWidth * .04,
-                      fontWeight: FontWeight.w300,
-                    ),
-                  ),
-                ],
-              )
-            ],
-          ),
-          SizedBox(
-            height: deviceWidth * .02,
-          ),
-          Row(
-            children: [
-              SizedBox(
-                width: deviceWidth * 0.04,
-              ),
-              Text(
-                'Anurag Ravi',
-                style: TextStyle(
-                  fontSize: deviceWidth * .04,
-                  fontWeight: FontWeight.w400,
-                  letterSpacing: 0.2,
+                  )),
+          title: SizedBox(
+            height: deviceWidth * 0.12,
+            child: Column(
+              children: [
+                SizedBox(
+                  height: deviceWidth * .02,
                 ),
-              ),
-              SizedBox(
-                width: deviceWidth * 0.05,
-              ),
-            ],
+                Row(
+                  children: [
+                    Flexible(
+                      child: Text(
+                        profile.username,
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontWeight: FontWeight.w700,
+                          fontFamily: 'arial',
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    SizedBox(
+                      width: 5,
+                    ),
+                    profile.verified
+                        ? Icon(
+                            Icons.verified,
+                            color: Colors.blue,
+                            size: deviceWidth * 0.06,
+                          )
+                        : widget.me
+                            ? Icon(
+                                Icons.keyboard_arrow_down,
+                                color: Colors.black,
+                                size: deviceWidth * 0.07,
+                              )
+                            : Container(),
+                  ],
+                ),
+              ],
+            ),
           ),
-          SizedBox(
-            height: deviceWidth * .01,
-          ),
-          Row(
-            children: [
-              SizedBox(
-                width: deviceWidth * 0.04,
-              ),
-              Flexible(
-                child: Text(
-                  'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiioooooooooooooooooooooooooooooooooooooooooooooo',
-                  overflow: TextOverflow.visible,
+          actions: <Widget>[
+            IconButton(
+              onPressed: () {
+                bottompopup1(context);
+              },
+              alignment: Alignment.center,
+              icon: widget.me
+                  ? SvgPicture.asset('assets/add.svg',
+                      height: deviceWidth * 0.09)
+                  : Icon(
+                      Icons.notifications_none_outlined,
+                      color: Colors.black,
+                      size: deviceWidth * 0.09,
+                    ),
+            ),
+            IconButton(
+              onPressed: () {
+                widget.me ? bottompopup(context) : bottompopup2(context);
+              },
+              alignment: Alignment.center,
+              icon: widget.me
+                  ? Icon(
+                      Icons.menu_outlined,
+                      color: Colors.black,
+                      size: deviceWidth * 0.09,
+                    )
+                  : Icon(
+                      Icons.more_vert,
+                      color: Colors.black,
+                      size: deviceWidth * 0.09,
+                    ),
+            ),
+          ],
+        ),
+        body: ListView(
+          children: [
+            SizedBox(
+              height: deviceWidth * .01,
+            ),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                SizedBox(
+                  width: deviceWidth * 0.045,
+                ),
+                SizedBox(
+                  height: deviceWidth * .26,
+                ),
+                ClipOval(
+                  child: Container(
+                    width: deviceWidth * 0.24,
+                    height: deviceWidth * 0.24,
+                    child: profile.dp != ''
+                        ? ChachedImage(url: profile.dp)
+                        : Image.asset('assets/avatar.png'),
+                  ),
+                ),
+                SizedBox(
+                  width: deviceWidth * .1,
+                ),
+                Column(
+                  children: <Widget>[
+                    Text(
+                      profile.totalPosts.toString(),
+                      style: TextStyle(
+                        fontSize: deviceWidth * .05,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    SizedBox(
+                      height: deviceWidth * .01,
+                    ),
+                    Text(
+                      'Posts',
+                      style: TextStyle(
+                        fontSize: deviceWidth * .04,
+                        fontWeight: FontWeight.w300,
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(
+                  width: deviceWidth * .04,
+                ),
+                GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (builder) => Followers(me: widget.me)));
+                  },
+                  child: Column(
+                    children: <Widget>[
+                      Text(
+                        profile.followers.toString(),
+                        style: TextStyle(
+                          fontSize: deviceWidth * .05,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      SizedBox(
+                        height: deviceWidth * .01,
+                      ),
+                      Text(
+                        'Followers',
+                        style: TextStyle(
+                          fontSize: deviceWidth * .04,
+                          fontWeight: FontWeight.w300,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(
+                  width: deviceWidth * .04,
+                ),
+                GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (builder) => Followers(me: widget.me)));
+                  },
+                  child: Column(
+                    children: <Widget>[
+                      Text(
+                        profile.following.toString(),
+                        style: TextStyle(
+                          fontSize: deviceWidth * .05,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      SizedBox(
+                        height: deviceWidth * .01,
+                      ),
+                      Text(
+                        'Following',
+                        style: TextStyle(
+                          fontSize: deviceWidth * .04,
+                          fontWeight: FontWeight.w300,
+                        ),
+                      ),
+                    ],
+                  ),
+                )
+              ],
+            ),
+            SizedBox(
+              height: deviceWidth * .02,
+            ),
+            Row(
+              children: [
+                SizedBox(
+                  width: deviceWidth * 0.04,
+                ),
+                Text(
+                  profile.name,
                   style: TextStyle(
-                    fontSize: deviceWidth * .037,
+                    fontSize: deviceWidth * .04,
                     fontWeight: FontWeight.w400,
                     letterSpacing: 0.2,
                   ),
                 ),
-              ),
-              SizedBox(
-                width: deviceWidth * 0.05,
-              ),
-            ],
-          ),
-          SizedBox(
-            height: deviceWidth * .07,
-          ),
-          widget.me ? Container() : Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              SizedBox(
-                width: deviceWidth * 0.04,
-              ),
-              Container(
-                width: deviceWidth * 0.2,
-                child: Stack(
-                  children: [
-                    CircleAvatar(
-                      radius: deviceWidth * 0.04,
-                      backgroundImage: const AssetImage('assets/avatar.png'),
-                    ),
-                    Positioned(
-                      left: deviceWidth * 0.06,
-                      child: CircleAvatar(
-                        radius: deviceWidth * 0.04,
-                        backgroundImage: const AssetImage('assets/avatar.png'),
-                      ),
-                    ),
-                    Positioned(
-                      left: deviceWidth * 0.12,
-                      child: CircleAvatar(
-                        radius: deviceWidth * 0.04,
-                        backgroundImage: const AssetImage('assets/avatar.png'),
-                      ),
-                    ),
-                  ],
+                SizedBox(
+                  width: deviceWidth * 0.05,
                 ),
-              ),
-              SizedBox(
-                width: deviceWidth * 0.02,
-              ),
-              Flexible(
-                child: RichText(
-                  text: TextSpan(
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontSize: deviceWidth * 0.04,
-                      ),
-                      children: const [
-                        TextSpan(
-                          text: "Followed By ",
-                          style: TextStyle(
-                            color: Colors.black,
-                          ),
-                        ),
-                        TextSpan(
-                          text: "Abscdefg",
-                          style: TextStyle(
-                            color: Colors.black,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        TextSpan(
-                          text: " , ",
-                          style: TextStyle(
-                            color: Colors.black,
-                          ),
-                        ),
-                        TextSpan(
-                          text: "hijklmno",
-                          style: TextStyle(
-                            color: Colors.black,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        TextSpan(
-                          text: " and ",
-                          style: TextStyle(
-                            color: Colors.black,
-                          ),
-                        ),
-                        TextSpan(
-                          text: "40 others",
-                          style: TextStyle(
-                            color: Colors.black,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ]),
-                ),
-              ),
-              SizedBox(
-                width: deviceWidth * 0.05,
-              ),
-            ],
-          ),
-          widget.me ? Container() : SizedBox(
-            height: deviceWidth * .07,
-          ),
-          Row(
-            children: <Widget>[
-              SizedBox(
-                width: deviceWidth * 0.03,
-              ),
-              widget.me ? Container() : GestureDetector(
-                onTap: () {
-                  setState(() {
-                    following = !following;
-                  });
-                },
-                child: Container(
-                  width: deviceWidth * 0.39,
-                  height: deviceWidth * .11,
-                  decoration: BoxDecoration(
-                    color: following ? Colors.transparent : Colors.blue,
-                    border: Border.all(
-                      color: following ? Colors.grey : Colors.blue,
-                    ),
-                    borderRadius: const BorderRadius.all(Radius.circular(7)),
-                  ),
-                  child: Center(
-                    child: Text(
-                      following? 'Following' : 'Follow',
-                      style: TextStyle(
-                        color: following ? Colors.grey[600] : Colors.white,
-                        fontSize: deviceWidth * .039,
-                        fontWeight: FontWeight.w400,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              SizedBox(
-                width: deviceWidth * .02,
-              ),
-              GestureDetector(
-                // onTap: () =>
-                //     Navigator.pushNamed(context, '/editprofile'),
-                child: Container(
-                  width: widget.me ? deviceWidth * .81 : deviceWidth * 0.39,
-                  height: deviceWidth * .11,
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                      color: Colors.grey,
-                    ),
-                    borderRadius: const BorderRadius.all(Radius.circular(7)),
-                  ),
-                  child: Center(
-                    child: Text(
-                      widget.me ? 'Edit Profile' : 'Message',
-                      style: TextStyle(
-                        color: Colors.grey[600],
-                        fontSize: deviceWidth * .039,
-                        fontWeight: FontWeight.w400,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              SizedBox(
-                width: deviceWidth * .02,
-              ),
-              GestureDetector(
-                onTap: () {
-                  setState(() {
-                    isvisible = !isvisible;
-                  });
-                },
-                child: Container(
-                  width: deviceWidth * .11,
-                  height: deviceWidth * .11,
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                      color: Colors.grey,
-                    ),
-                    borderRadius: const BorderRadius.all(Radius.circular(7)),
-                  ),
-                  child: Center(
-                    child: Icon(
-                      isvisible
-                          ? Icons.keyboard_arrow_up
-                          : Icons.keyboard_arrow_down,
-                      color: Colors.grey[600],
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          Visibility(
-            visible: isvisible,
-            child: Column(
+              ],
+            ),
+            SizedBox(
+              height: deviceWidth * .01,
+            ),
+            Row(
               children: [
                 SizedBox(
-                  height: deviceWidth * .04,
+                  width: deviceWidth * 0.04,
                 ),
-                Row(
-                  children: [
-                    SizedBox(
-                      width: deviceWidth * .02,
+                Flexible(
+                  child: Text(
+                    profile.bio,
+                    overflow: TextOverflow.visible,
+                    style: TextStyle(
+                      fontSize: deviceWidth * .037,
+                      fontWeight: FontWeight.w400,
+                      letterSpacing: 0.2,
                     ),
-                    Text(
-                      'Discover People',
-                      style: TextStyle(
-                        color: Colors.black54,
-                        fontSize: deviceWidth * .039,
-                        fontWeight: FontWeight.w400,
-                        letterSpacing: 0.2,
-                      ),
-                    ),
-                    SizedBox(
-                      width: deviceWidth * .55,
-                    ),
-                    Text(
-                      'See All',
-                      style: TextStyle(
-                        color: Colors.blue,
-                        fontSize: deviceWidth * .039,
-                        fontWeight: FontWeight.w500,
-                        letterSpacing: 0.2,
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
                 SizedBox(
-                  height: deviceWidth * .01,
+                  width: deviceWidth * 0.05,
                 ),
-                Container(
-                  height: deviceWidth * 0.55,
-                  child: ListView(
-                    scrollDirection: Axis.horizontal,
-                    children: List.generate(
-                      17,
-                      (int index) {
-                        return FollowCard();
-                      },
+              ],
+            ),
+            SizedBox(
+              height: deviceWidth * .07,
+            ),
+            widget.me
+                ? Container()
+                : profile.firstMutual.isNotEmpty
+                    ? Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          SizedBox(
+                            width: deviceWidth * 0.04,
+                          ),
+                          Expanded(
+                            flex: profile.firstMutual.length == 1  ? 1 : profile.firstMutual.length >= 3 ? 3 : 2,
+                            child:
+                                mutualLogos(profile.firstMutual, deviceWidth),
+                          ),
+                          SizedBox(
+                            width: deviceWidth * 0.04,
+                          ),
+                          Expanded(
+                            flex: 10,
+                            child: RichText(
+                              text: TextSpan(
+                                  style: TextStyle(
+                                    color: Colors.black,
+                                    fontSize: deviceWidth * 0.04,
+                                  ),
+                                  children: [
+                                    TextSpan(
+                                      text: "Followed By ",
+                                      style: TextStyle(
+                                        color: Colors.black,
+                                      ),
+                                    ),
+                                    profile.firstMutual.isNotEmpty
+                                        ? TextSpan(
+                                            text:
+                                                profile.firstMutual[0].username,
+                                            style: TextStyle(
+                                              color: Colors.black,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          )
+                                        : TextSpan(),
+                                    profile.firstMutual.length > 1
+                                        ? TextSpan(
+                                            text: " , ",
+                                            style: TextStyle(
+                                              color: Colors.black,
+                                            ),
+                                          )
+                                        : TextSpan(),
+                                    profile.firstMutual.length > 1
+                                        ? TextSpan(
+                                            text:
+                                                profile.firstMutual[1].username,
+                                            style: TextStyle(
+                                              color: Colors.black,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          )
+                                        : TextSpan(),
+                                    TextSpan(
+                                      text: " and ",
+                                      style: TextStyle(
+                                        color: Colors.black,
+                                      ),
+                                    ),
+                                    TextSpan(
+                                      text: profile.mutualFriends.toString(),
+                                      style: TextStyle(
+                                        color: Colors.black,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    TextSpan(
+                                      text: " others",
+                                      style: TextStyle(
+                                        color: Colors.black,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ]),
+                            ),
+                          ),
+                          SizedBox(
+                            width: deviceWidth * 0.05,
+                          ),
+                        ],
+                      )
+                    : Container(),
+            widget.me
+                ? Container()
+                : SizedBox(
+                    height: deviceWidth * .07,
+                  ),
+            Row(
+              children: <Widget>[
+                SizedBox(
+                  width: deviceWidth * 0.03,
+                ),
+                widget.me
+                    ? Container()
+                    : GestureDetector(
+                        onTap: () {
+                          follow();
+                          // setState(() {
+                          //   profile.meFollowing = !profile.meFollowing;
+                          // });
+                        },
+                        child: Container(
+                          width: deviceWidth * 0.39,
+                          height: deviceWidth * .11,
+                          decoration: BoxDecoration(
+                            color: profile.meFollowing
+                                ? Colors.transparent
+                                : Colors.blue,
+                            border: Border.all(
+                              color: profile.meFollowing
+                                  ? Colors.grey
+                                  : Colors.blue,
+                            ),
+                            borderRadius:
+                                const BorderRadius.all(Radius.circular(7)),
+                          ),
+                          child: Center(
+                            child: Text(
+                              profile.meFollowing ? 'Following' : 'Follow',
+                              style: TextStyle(
+                                color:
+                                    profile.meFollowing ? Colors.grey[600] : Colors.white,
+                                fontSize: deviceWidth * .039,
+                                fontWeight: FontWeight.w400,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                SizedBox(
+                  width: deviceWidth * .02,
+                ),
+                GestureDetector(
+                  // onTap: () =>
+                  //     Navigator.pushNamed(context, '/editprofile'),
+                  child: Container(
+                    width: widget.me ? deviceWidth * .81 : deviceWidth * 0.39,
+                    height: deviceWidth * .11,
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: Colors.grey,
+                      ),
+                      borderRadius: const BorderRadius.all(Radius.circular(7)),
+                    ),
+                    child: Center(
+                      child: Text(
+                        widget.me ? 'Edit Profile' : 'Message',
+                        style: TextStyle(
+                          color: Colors.grey[600],
+                          fontSize: deviceWidth * .039,
+                          fontWeight: FontWeight.w400,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  width: deviceWidth * .02,
+                ),
+                GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      isvisible = !isvisible;
+                    });
+                  },
+                  child: Container(
+                    width: deviceWidth * .11,
+                    height: deviceWidth * .11,
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: Colors.grey,
+                      ),
+                      borderRadius: const BorderRadius.all(Radius.circular(7)),
+                    ),
+                    child: Center(
+                      child: Icon(
+                        isvisible
+                            ? Icons.keyboard_arrow_up
+                            : Icons.keyboard_arrow_down,
+                        color: Colors.grey[600],
+                      ),
                     ),
                   ),
                 ),
               ],
             ),
-          ),
-          SizedBox(
-            height: deviceWidth * .05,
-          ),
-          Container(
-            height: deviceWidth * 0.29,
-            child: ListView(
-              scrollDirection: Axis.horizontal,
-              padding: EdgeInsets.symmetric(horizontal: deviceWidth * 0.02),
-              children: List.generate(
-                10,
-                (int index) {
-                  return HighlightCard();
-                },
+            Visibility(
+              visible: isvisible,
+              child: Column(
+                children: [
+                  SizedBox(
+                    height: deviceWidth * .04,
+                  ),
+                  Row(
+                    children: [
+                      SizedBox(
+                        width: deviceWidth * .02,
+                      ),
+                      Text(
+                        'Discover People',
+                        style: TextStyle(
+                          color: Colors.black54,
+                          fontSize: deviceWidth * .039,
+                          fontWeight: FontWeight.w400,
+                          letterSpacing: 0.2,
+                        ),
+                      ),
+                      SizedBox(
+                        width: deviceWidth * .55,
+                      ),
+                      Text(
+                        'See All',
+                        style: TextStyle(
+                          color: Colors.blue,
+                          fontSize: deviceWidth * .039,
+                          fontWeight: FontWeight.w500,
+                          letterSpacing: 0.2,
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(
+                    height: deviceWidth * .01,
+                  ),
+                  Container(
+                    height: deviceWidth * 0.55,
+                    child: ListView(
+                      scrollDirection: Axis.horizontal,
+                      children: List.generate(
+                        17,
+                        (int index) {
+                          return FollowCard();
+                        },
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
-          ),
-          SizedBox(
-            height: deviceWidth * .05,
-          ),
-          Row(
-            children: <Widget>[
-              Expanded(
-                flex: 6,
-                child: Center(
-                  child: Icon(
-                    Icons.view_module_outlined,
-                    size: deviceWidth * 0.11,
+            SizedBox(
+              height: deviceWidth * .05,
+            ),
+            Container(
+              height: deviceWidth * 0.29,
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                padding: EdgeInsets.symmetric(horizontal: deviceWidth * 0.02),
+                children: List.generate(
+                  10,
+                  (int index) {
+                    return HighlightCard();
+                  },
+                ),
+              ),
+            ),
+            SizedBox(
+              height: deviceWidth * .05,
+            ),
+            Row(
+              children: <Widget>[
+                Expanded(
+                  flex: 6,
+                  child: Center(
+                    child: Icon(
+                      Icons.view_module_outlined,
+                      size: deviceWidth * 0.11,
+                      color: posts ? Colors.black : Colors.grey,
+                    ),
+                  ),
+                ),
+                Expanded(
+                  flex: 6,
+                  child: Center(
+                    child: Icon(
+                      Icons.person_pin_outlined,
+                      size: deviceWidth * 0.1,
+                      color: posts ? Colors.grey : Colors.black,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            Row(
+              children: [
+                Expanded(
+                  flex: 6,
+                  child: Container(
+                    height: 2,
+                    width: deviceWidth * .5,
                     color: posts ? Colors.black : Colors.grey,
                   ),
                 ),
-              ),
-              Expanded(
-                flex: 6,
-                child: Center(
-                  child: Icon(
-                    Icons.person_pin_outlined,
-                    size: deviceWidth * 0.1,
+                Expanded(
+                  flex: 6,
+                  child: Container(
+                    height: 2,
+                    width: deviceWidth * .5,
                     color: posts ? Colors.grey : Colors.black,
                   ),
                 ),
-              ),
-            ],
-          ),
-          Row(
-            children: [
-              Expanded(
-                flex: 6,
-                child: Container(
-                  height: 2,
-                  width: deviceWidth * .5,
-                  color: posts ? Colors.black : Colors.grey,
-                ),
-              ),
-              Expanded(
-                flex: 6,
-                child: Container(
-                  height: 2,
-                  width: deviceWidth * .5,
-                  color: posts ? Colors.grey : Colors.black,
-                ),
-              ),
-            ],
-          ),
-          SizedBox(
-            height: deviceWidth * .015,
-          ),
-          Container(
-            height: deviceWidth,
-            padding: const EdgeInsets.symmetric(horizontal: 1),
-            child: PageView(
-              controller: controller,
-              onPageChanged: (value) {
-                setState(() {
-                  posts = value == 0;
-                });
-              },
-              children: [
-                GridView.builder(
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 3),
-                  itemCount: 10,
-                  itemBuilder: (context, index) {
-                    return Padding(
-                      padding: const EdgeInsets.all(1),
-                      child: AspectRatio(
-                        aspectRatio: 1 / 1,
-                        child: Image.asset(
-                          'assets/post0.jpeg',
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                    );
-                  },
-                ),
-                GridView.builder(
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 3),
-                  itemCount: 5,
-                  itemBuilder: (context, index) {
-                    return Padding(
-                      padding: const EdgeInsets.all(1),
-                      child: AspectRatio(
-                        aspectRatio: 1 / 1,
-                        child: Image.asset(
-                          'assets/post0.jpeg',
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                    );
-                  },
-                )
               ],
+            ),
+            SizedBox(
+              height: deviceWidth * .015,
+            ),
+            Container(
+              height: deviceWidth,
+              padding: const EdgeInsets.symmetric(horizontal: 1),
+              child: PageView(
+                controller: controller,
+                onPageChanged: (value) {
+                  setState(() {
+                    posts = value == 0;
+                  });
+                },
+                children: [
+                  GridView.builder(
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 3),
+                    itemCount: profile.posts.length,
+                    itemBuilder: (context, index) {
+                      return Padding(
+                        padding: const EdgeInsets.all(1),
+                        child: AspectRatio(
+                          aspectRatio: 1 / 1,
+                          child: ChachedImage(
+                            url: profile.posts[index].url,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                  GridView.builder(
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 3),
+                    itemCount: profile.tags.length,
+                    itemBuilder: (context, index) {
+                      return Padding(
+                        padding: const EdgeInsets.all(1),
+                        child: AspectRatio(
+                          aspectRatio: 1 / 1,
+                          child: ChachedImage(
+                            url: profile.tags[index].url,
+                          ),
+                        ),
+                      );
+                    },
+                  )
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget mutualLogos(List<ProfileShort> frnds, double deviceWidth) {
+    if (frnds.length == 1) {
+      return Stack(
+        children: [
+          ClipOval(
+            child: Container(
+              width: deviceWidth * 0.08,
+              height: deviceWidth * 0.08,
+              child: frnds[0].url != ''
+                  ? ChachedImage(
+                      url: frnds[0].url,
+                    )
+                  : Image.asset('assets/avatar.png'),
+            ),
+          )
+        ],
+      );
+    }
+    if (frnds.length == 2) {
+      return Stack(
+        children: [
+          ClipOval(
+            child: Container(
+              width: deviceWidth * 0.08,
+              height: deviceWidth * 0.08,
+              child: frnds[0].url != ''
+                  ? ChachedImage(
+                      url: frnds[0].url,
+                    )
+                  : Image.asset('assets/avatar.png'),
+            ),
+          ),
+          Positioned(
+            left: deviceWidth * 0.06,
+            child: ClipOval(
+              child: Container(
+                width: deviceWidth * 0.08,
+                height: deviceWidth * 0.08,
+                child: frnds[1].url != ''
+                    ? ChachedImage(
+                        url: frnds[1].url,
+                      )
+                    : Image.asset('assets/avatar.png'),
+              ),
             ),
           ),
         ],
-      ),
-    );
+      );
+    }
+    if (frnds.length == 3) {
+      return Stack(
+        children: [
+          ClipOval(
+            child: Container(
+              width: deviceWidth * 0.08,
+              height: deviceWidth * 0.08,
+              child: frnds[0].url != ''
+                  ? ChachedImage(
+                      url: frnds[0].url,
+                    )
+                  : Image.asset('assets/avatar.png'),
+            ),
+          ),
+          Positioned(
+            left: deviceWidth * 0.06,
+            child: ClipOval(
+              child: Container(
+                width: deviceWidth * 0.08,
+                height: deviceWidth * 0.08,
+                child: frnds[1].url != ''
+                    ? ChachedImage(
+                        url: frnds[1].url,
+                      )
+                    : Image.asset('assets/avatar.png'),
+              ),
+            ),
+          ),
+          Positioned(
+            left: deviceWidth * 0.12,
+            child: ClipOval(
+              child: Container(
+                width: deviceWidth * 0.08,
+                height: deviceWidth * 0.08,
+                child: frnds[2].url != ''
+                    ? ChachedImage(
+                        url: frnds[2].url,
+                      )
+                    : Image.asset('assets/avatar.png'),
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+    return Container();
   }
 }
 
@@ -1252,8 +1421,7 @@ void bottompopup2(context) {
                     padding:
                         const EdgeInsets.symmetric(horizontal: 5, vertical: 15),
                     child: GestureDetector(
-                      onTap: () async {
-                      },
+                      onTap: () async {},
                       child: Row(
                         children: [
                           SizedBox(
@@ -1285,4 +1453,3 @@ void bottompopup2(context) {
         );
       });
 }
-

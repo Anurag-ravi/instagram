@@ -55,7 +55,7 @@ class ProfileModel {
       json['dp'] as String,
       json['mutual_friends'] as int,
       _firstMutual,
-      json['profile_id'] as bool,
+      json['me_following'] as bool,
       _posts,
       _tags,
     );

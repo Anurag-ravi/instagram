@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart';
 import 'package:instagram/pages/login.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -15,7 +16,8 @@ logout(context) async {
   ));
 }
 
-settoken(token) async {
+settoken(Response response) async {
         SharedPreferences prefs = await SharedPreferences.getInstance();
-        prefs.setString('token', token);
+        String? token = response.headers['jwt'];
+        prefs.setString('token', token!);
 }
