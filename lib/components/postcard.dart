@@ -87,7 +87,7 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
                 flex: 1,
                 child: IconButton(
                   onPressed: () {
-                    // bottompopup(context,index);
+                    bottompopup(context);
                   },
                   icon: Icon(
                     Icons.more_vert,
@@ -428,4 +428,116 @@ class _HeartAnimationWidgetState extends State<HeartAnimationWidget> with Single
     child: widget.child
     );
 
+}
+
+void bottompopup(context) {
+  double devicewidth = MediaQuery.of(context).size.width;
+  showModalBottomSheet(
+      context: context,
+      builder: (BuildContext bc) {
+        return Container(
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(30),
+              topRight: Radius.circular(30),
+            ),
+          ),
+          height: devicewidth * 0.5,
+          child: Flexible(
+            child: ListView(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 5),
+                  child: Center(
+                    child: Container(
+                      width: devicewidth * 0.15,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: Colors.black54,
+                        borderRadius: BorderRadius.circular(2)
+                      ),
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 5,vertical: 10),
+                  child: Row(
+                    children: [
+                      SizedBox(
+                        width: devicewidth * 0.05,
+                      ),
+                      Icon(
+                        Icons.report,
+                        size: devicewidth * 0.07,
+                        color: Colors.redAccent,
+                      ),
+                      SizedBox(
+                        width: devicewidth * 0.025,
+                      ),
+                      Text(
+                        'Report',
+                        style: TextStyle(
+                          fontSize: devicewidth * 0.055,
+                          color: Colors.black54,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 5,vertical: 10),
+                  child: Row(
+                    children: [
+                      SizedBox(
+                        width: devicewidth * 0.05,
+                      ),
+                      Icon(
+                        Icons.link,
+                        size: devicewidth * 0.07,
+                        color: Colors.black54,
+                      ),
+                      SizedBox(
+                        width: devicewidth * 0.025,
+                      ),
+                      Text(
+                        'Copy Link',
+                        style: TextStyle(
+                          fontSize: devicewidth * 0.055,
+                          color: Colors.black54,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 5,vertical: 10),
+                  child: Row(
+                    children: [
+                      SizedBox(
+                        width: devicewidth * 0.05,
+                      ),
+                      Icon(
+                        Icons.share,
+                        size: devicewidth * 0.07,
+                        color: Colors.black54,
+                      ),
+                      SizedBox(
+                        width: devicewidth * 0.025,
+                      ),
+                      Text(
+                        'Share',
+                        style: TextStyle(
+                          fontSize: devicewidth * 0.055,
+                          color: Colors.black54,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      });
 }

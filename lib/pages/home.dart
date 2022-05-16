@@ -21,7 +21,7 @@ class _HomePageState extends State<HomePage> {
         children: [
           const CameraScreen(),
           FeedScreen(controller: _controller),
-          const DmScreen(),
+          DmScreen(controller: _controller,),
         ],
       ),
     );

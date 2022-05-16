@@ -3,6 +3,8 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:instagram/screens/feed/activity.dart';
 import 'package:instagram/screens/feed/feed.dart';
 import 'package:instagram/screens/feed/profile.dart';
+import 'package:instagram/screens/feed/reels.dart';
+import 'package:instagram/screens/feed/search.dart';
 
 class FeedScreen extends StatefulWidget {
   const FeedScreen({Key? key, required this.controller}) : super(key: key);
@@ -18,10 +20,10 @@ class _FeedScreenState extends State<FeedScreen> {
     double deviceWidth = MediaQuery.of(context).size.width;
     return Scaffold(
       body: currIndex == 0 ? Feed(controller: widget.controller) :
-      currIndex == 1 ? Text('search') :
-      currIndex == 2 ? Text('reel') :
+      currIndex == 1 ? Search() :
+      currIndex == 2 ? Reels() :
       currIndex == 3 ? Activity() :
-                       Profile(),
+                       Profile(me: true,),
       bottomNavigationBar: Container(
         height: deviceWidth * 0.18,
         child: BottomNavigationBar(

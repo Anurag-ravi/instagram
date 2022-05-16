@@ -24,7 +24,9 @@ class _FeedState extends State<Feed> {
         ),
         actions: <Widget>[
           IconButton(
-              onPressed: () { },
+              onPressed: () {
+                bottompopup1(context);
+               },
               alignment: Alignment.center,
               icon: SvgPicture.asset('assets/add.svg',
                   height: deviceWidth * 0.09)
@@ -94,4 +96,183 @@ class _FeedState extends State<Feed> {
       ),
     );
   }
+}
+
+void bottompopup1(context) {
+  double devicewidth = MediaQuery.of(context).size.width;
+  showModalBottomSheet(
+      context: context,
+      builder: (BuildContext bc) {
+        return Container(
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(30),
+              topRight: Radius.circular(30),
+            ),
+          ),
+          height: devicewidth,
+          child: Flexible(
+            child: ListView(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 5),
+                  child: Center(
+                    child: Container(
+                      width: devicewidth * 0.15,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: Colors.black54,
+                        borderRadius: BorderRadius.circular(2)
+                      ),
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 2),
+                  child: Center(
+                    child: Text(
+                        'Create',
+                        style: TextStyle(
+                          fontSize: devicewidth * 0.06,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.black54,
+                        ),
+                      ),
+                  ),
+                ),
+                const Divider(
+                  height: 5,
+                  thickness: 1,
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 5,vertical: 10),
+                  child: Row(
+                    children: [
+                      SizedBox(
+                        width: devicewidth * 0.05,
+                      ),
+                      Icon(
+                        Icons.grid_3x3_rounded,
+                        size: devicewidth * 0.07,
+                        color: Colors.black54,
+                      ),
+                      SizedBox(
+                        width: devicewidth * 0.02,
+                      ),
+                      Text(
+                        'Post',
+                        style: TextStyle(
+                          fontSize: devicewidth * 0.055,
+                          color: Colors.black54,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 5,vertical: 10),
+                  child: Row(
+                    children: [
+                      SizedBox(
+                        width: devicewidth * 0.05,
+                      ),
+                      Icon(
+                        Icons.video_collection_outlined,
+                        size: devicewidth * 0.07,
+                        color: Colors.black54,
+                      ),
+                      SizedBox(
+                        width: devicewidth * 0.02,
+                      ),
+                      Text(
+                        'Reels',
+                        style: TextStyle(
+                          fontSize: devicewidth * 0.055,
+                          color: Colors.black54,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 5,vertical: 10),
+                  child: Row(
+                    children: [
+                      SizedBox(
+                        width: devicewidth * 0.05,
+                      ),
+                      Icon(
+                        Icons.add_circle_outline_rounded,
+                        size: devicewidth * 0.07,
+                        color: Colors.black54,
+                      ),
+                      SizedBox(
+                        width: devicewidth * 0.02,
+                      ),
+                      Text(
+                        'Story',
+                        style: TextStyle(
+                          fontSize: devicewidth * 0.055,
+                          color: Colors.black54,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 5,vertical: 10),
+                  child: Row(
+                    children: [
+                      SizedBox(
+                        width: devicewidth * 0.05,
+                      ),
+                      Icon(
+                        Icons.favorite_outline_rounded,
+                        size: devicewidth * 0.07,
+                        color: Colors.black54,
+                      ),
+                      SizedBox(
+                        width: devicewidth * 0.02,
+                      ),
+                      Text(
+                        'Story Highlight',
+                        style: TextStyle(
+                          fontSize: devicewidth * 0.055,
+                          color: Colors.black54,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 5,vertical: 10),
+                  child: Row(
+                    children: [
+                      SizedBox(
+                        width: devicewidth * 0.05,
+                      ),
+                      Icon(
+                        Icons.wifi_tethering,
+                        size: devicewidth * 0.07,
+                        color: Colors.black54,
+                      ),
+                      SizedBox(
+                        width: devicewidth * 0.02,
+                      ),
+                      Text(
+                        'Live',
+                        style: TextStyle(
+                          fontSize: devicewidth * 0.055,
+                          color: Colors.black54,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      });
 }

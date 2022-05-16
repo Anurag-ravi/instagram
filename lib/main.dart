@@ -19,6 +19,7 @@ class MyApp extends StatelessWidget {
       title: 'Instagram',
       theme: ThemeData(
         // fontFamily: "OpenSans",
+        bottomSheetTheme: const BottomSheetThemeData(backgroundColor: Colors.transparent),
         colorScheme: ColorScheme.fromSwatch().copyWith(
             secondary: Colors.black,
             primary: Colors.white,
