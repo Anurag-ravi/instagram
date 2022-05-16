@@ -174,7 +174,7 @@ class _ProfileState extends State<Profile> {
                 height: deviceWidth * .26,
               ),
               CircleAvatar(
-                backgroundImage: profile.dp == '' ? NetworkImage(profile.dp) : AssetImage('assets/avatar.png'),
+                backgroundImage: profile.dp == '' ? NetworkImage(profile.dp) as ImageProvider<Object> : AssetImage('assets/avatar.png'),
                 radius: deviceWidth * 0.12,
               ),
               SizedBox(
