@@ -11,8 +11,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 
 class Login extends StatefulWidget {
-  const Login({ Key? key }) : super(key: key);
-
+  const Login({ Key? key ,required this.prefs}) : super(key: key);
+  final SharedPreferences prefs;
   @override
   State<Login> createState() => _LoginState();
 }
@@ -136,7 +136,7 @@ class _LoginState extends State<Login> {
                       children: [
                         GestureDetector(
                           onTap: () {
-                            Navigator.push(context, MaterialPageRoute(builder: (builder)=> const Forgot_Password()));
+                            Navigator.push(context, MaterialPageRoute(builder: (builder)=> Forgot_Password(prefs: widget.prefs,)));
                           },
                           child: Text('Forgot password?      ',
                             style: TextStyle(
@@ -246,7 +246,7 @@ class _LoginState extends State<Login> {
                           ),
                           GestureDetector(
                             onTap: (){
-                              Navigator.push(context, MaterialPageRoute(builder: (builder)=> const Signup()));
+                              Navigator.push(context, MaterialPageRoute(builder: (builder)=> Signup(prefs: widget.prefs,)));
                             },
                             child: Text('Sign up',
                               style: TextStyle(
@@ -284,13 +284,14 @@ class _LoginState extends State<Login> {
       );
       var data = jsonDecode(response.body);
       if(response.statusCode == 200){
-        SharedPreferences prefs = await SharedPreferences.getInstance();
-        prefs.setString('token', data['jwt']);
+        widget.prefs.setString('token', data['jwt']);
+        widget.prefs.setString('username', data['username']);
+        widget.prefs.setString('dp', data['dp']);
         const snackBar = SnackBar(
         content: Text('Succcessfully Logged in'),
         );
         ScaffoldMessenger.of(context).showSnackBar(snackBar);
-        Navigator.push(context, MaterialPageRoute(builder: (builder) => const HomePage()));
+        Navigator.push(context, MaterialPageRoute(builder: (builder) => HomePage(prefs: widget.prefs,)));
         return;
       }
       var snackBar = SnackBar(

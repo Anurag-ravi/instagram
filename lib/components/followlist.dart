@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:instagram/components/followcard.dart';
+import 'package:instagram/components/profilecard.dart';
 import 'package:instagram/models/followmodel.dart';
+import 'package:instagram/models/suggestionmodel.dart';
 
 class FollowList extends StatefulWidget {
-  const FollowList({Key? key, required this.followlist}) : super(key: key);
+  const FollowList({Key? key, required this.followlist,this.issuggestions = false,required this.suggestionlist}) : super(key: key);
   final List<FollowModel> followlist;
+  final bool issuggestions;
+  final List<SuggestionModel> suggestionlist;
 
   @override
   State<FollowList> createState() => _FollowListState();
@@ -17,7 +21,7 @@ class _FollowListState extends State<FollowList> {
     return Column(
       children: [
         SizedBox(
-          height: deviceWidth * .01,
+          height: deviceWidth * .02,
         ),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -47,48 +51,25 @@ class _FollowListState extends State<FollowList> {
             ),
           ],
         ),
-        Container(
-          height: deviceWidth * 0.15,
-          child: ListView(
-            scrollDirection: Axis.horizontal,
-            children: List.generate(
-              10,
-              (int index) {
-                return Container(
-                  width: deviceWidth * 0.20,
-                  height: deviceWidth * 0.10,
-                  margin: const EdgeInsets.all(9),
-                  decoration: BoxDecoration(
-                    shape: BoxShape.rectangle,
-                    border: Border.all(
-                      color: Colors.grey,
-                      width: deviceWidth * 0.003,
-                    ),
-                    borderRadius: const BorderRadius.all(Radius.circular(5)),
-                  ),
-                  child: Center(
-                    child: Text(
-                      'hehe',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w400,
-                      ),
-                    ),
-                  ),
-                );
-              },
-            ),
-          ),
-        ),
         const Divider(
           height: 5,
           thickness: 1,
         ),
         Expanded(
-            child: ListView(
-          children: List.generate(
-            10,
-            (index) => FollowCard(),
-          ),
+            child: widget.issuggestions ? 
+            GridView.builder(
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2),
+              itemCount: widget.suggestionlist.length,
+              itemBuilder: (context, index) {
+                      return FollowCard(profile: widget.suggestionlist[index]);
+                    },
+              ) 
+            :ListView(
+            children: List.generate(
+            widget.followlist.length,
+              (index) => ProfileCard(profile: widget.followlist[index]),
+            ),
         ))
       ],
     );

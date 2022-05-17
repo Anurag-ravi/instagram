@@ -6,10 +6,11 @@ import 'package:flutter/material.dart';
 import 'package:instagram/data.dart';
 import 'package:instagram/pages/login.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Forgot_Password extends StatefulWidget {
-  const Forgot_Password({ Key? key }) : super(key: key);
-
+  const Forgot_Password({ Key? key,required this.prefs}) : super(key: key);
+  final SharedPreferences prefs;
   @override
   State<Forgot_Password> createState() => _Forgot_PasswordState();
 }
@@ -179,7 +180,7 @@ class _Forgot_PasswordState extends State<Forgot_Password> {
                           ),
                           GestureDetector(
                             onTap: (){
-                              Navigator.push(context, MaterialPageRoute(builder: (builder)=> const Login()));
+                              Navigator.push(context, MaterialPageRoute(builder: (builder)=> Login(prefs: widget.prefs,)));
                             },
                             child: Text('Login',
                               style: TextStyle(
@@ -215,7 +216,7 @@ class _Forgot_PasswordState extends State<Forgot_Password> {
       );
       var data = jsonDecode(response.body);
       if(response.statusCode == 200){
-        Navigator.push(context, MaterialPageRoute(builder: (builder) => const Login()));
+        Navigator.push(context, MaterialPageRoute(builder: (builder) => Login(prefs: widget.prefs,)));
         var snackBar = SnackBar(
         content: Text(data['message']),
         );

@@ -12,8 +12,6 @@ class ChachedImage extends StatelessWidget {
         fit: BoxFit.cover,
         progressIndicatorBuilder: (context, url, downloadProgress) =>
             SizedBox(
-              height: 50,
-              width: 50,
               child: CircularProgressIndicator(
                 strokeWidth: 2,
                 color: Colors.white70,

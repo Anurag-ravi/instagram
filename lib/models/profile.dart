@@ -60,4 +60,21 @@ class ProfileModel {
       _tags,
     );
   }
+
+  Map<String, dynamic> toJson() => {
+    'profile_id': profileId,
+    'username': username,
+    'verified':verified,
+    'total_posts':totalPosts,
+    'followers':followers,
+    'following':following,
+    'name':name,
+    'bio':bio,
+    'dp':dp,
+    'mutual_friends':mutualFriends,
+    'me_following':meFollowing,
+    'first_mutual':[],
+    'posts':[],
+    'tags':[],
+  };
 }

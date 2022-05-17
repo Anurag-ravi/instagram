@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart';
 import 'package:instagram/pages/login.dart';
@@ -12,7 +13,7 @@ logout(context) async {
   );
   ScaffoldMessenger.of(context).showSnackBar(snackBar);
   Navigator.of(context).pushReplacement(MaterialPageRoute(
-    builder: (BuildContext context) => const Login(),
+    builder: (BuildContext context) => Login(prefs: prefs,),
   ));
 }
 
@@ -21,3 +22,17 @@ settoken(Response response) async {
         String? token = response.headers['jwt'];
         prefs.setString('token', token!);
 }
+
+Future<bool> internetAvailable() async {
+  try {
+    final result = await InternetAddress.lookup('google.com');
+    if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
+      return true;
+    }
+  } on SocketException catch (_) {
+    return false;
+  }
+  return false;
+}
+
+

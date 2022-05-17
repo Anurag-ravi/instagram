@@ -4,10 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:instagram/data.dart';
 import 'package:instagram/pages/login.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Signup extends StatefulWidget {
-  const Signup({Key? key}) : super(key: key);
-
+  const Signup({Key? key,required this.prefs}) : super(key: key);
+  final SharedPreferences prefs;
   @override
   State<Signup> createState() => _SignupState();
 }
@@ -299,7 +300,7 @@ class _SignupState extends State<Signup> {
                           ),
                           GestureDetector(
                             onTap: () {
-                              Navigator.push(context, MaterialPageRoute(builder: (builder)=> const Login()));
+                              Navigator.push(context, MaterialPageRoute(builder: (builder)=> Login(prefs: widget.prefs,)));
                             },
                             child: Text(
                               'Log in',
@@ -340,7 +341,7 @@ class _SignupState extends State<Signup> {
       );
       var data = jsonDecode(response.body);
       if(response.statusCode == 201){
-        Navigator.push(context, MaterialPageRoute(builder: (builder) => const Login()));
+        Navigator.push(context, MaterialPageRoute(builder: (builder) => Login(prefs: widget.prefs,)));
         var snackBar = SnackBar(
         content: Text(data['message']),
         );

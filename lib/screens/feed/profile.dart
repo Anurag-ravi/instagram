@@ -2,15 +2,16 @@
 
 import 'dart:convert';
 
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:instagram/components/bottomnavbar.dart';
 import 'package:instagram/components/cacheimage.dart';
 import 'package:instagram/components/followCard.dart';
 import 'package:instagram/components/highlightcard.dart';
 import 'package:instagram/data.dart';
 import 'package:instagram/models/profile.dart';
 import 'package:instagram/models/profile_short.dart';
+import 'package:instagram/models/suggestionmodel.dart';
 import 'package:instagram/screens/profile/followers.dart';
 import 'package:instagram/utilities/logout.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -30,8 +31,22 @@ class _ProfileState extends State<Profile> {
   final controller = PageController(initialPage: 0);
   bool following = true;
   bool isvisible = false;
+  List<SuggestionModel> suggestions = [];
   ProfileModel profile = ProfileModel(
-      0, 'username', false, 0, 0, 0, 'name', 'bio', '', 0, [], false, [], []);
+      0, 
+      'username', 
+      false, 
+      0, 
+      0, 
+      0, 
+      'name', 
+      'bio', 
+      '', 
+      0, 
+      [], 
+      false, 
+      [], 
+      []);
 
   @override
   void initState() {
@@ -43,22 +58,39 @@ class _ProfileState extends State<Profile> {
   Future<void> fetch() async {
     if (widget.me) {
       SharedPreferences prefs = await SharedPreferences.getInstance();
-      String token = prefs.getString('token').toString();
-      final response = await http.get(
-        Uri.parse("${url}user/profile/"),
-        headers: {
-          "Authorization": token,
-        },
-      );
-      var data = jsonDecode(jsonDecode(response.body));
-      if (response.statusCode == 200) {
+      if(prefs.getString('profile') != null){
+        Map<String,dynamic> jsondatais = jsonDecode(prefs.getString('profile')!);
         setState(() {
-          profile = ProfileModel.fromJson(data);
+          profile = ProfileModel.fromJson(jsondatais);
         });
-        settoken(response);
       }
-      if (response.statusCode == 401) {
-        logout(context);
+      if (await internetAvailable()){
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        String token = prefs.getString('token').toString();
+        final response = await http.get(
+          Uri.parse("${url}user/profile/"),
+          headers: {
+            "Authorization": token,
+          },
+        );
+        var data = jsonDecode(jsonDecode(response.body));
+        if (response.statusCode == 200) {
+          setState(() {
+            profile = ProfileModel.fromJson(data);
+          });
+          prefs.setString('profile',jsonEncode(profile));
+          prefs.setString('username',profile.username);
+          prefs.setString('dp',profile.dp);
+          settoken(response);
+        }
+        if (response.statusCode == 401) {
+          logout(context);
+        }
+      } else {
+        const snackBar = SnackBar(
+        content: Text('Please Connect to Internet'),
+        );
+        ScaffoldMessenger.of(context).showSnackBar(snackBar);
       }
     } else {
       SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -245,15 +277,23 @@ class _ProfileState extends State<Profile> {
                     ),
                   ],
                 ),
-                SizedBox(
-                  width: deviceWidth * .04,
+                GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (builder) => Followers(me: widget.me,initialIndex: widget.me ? 0 : 1,username:widget.username)));
+                  },
+                  child: SizedBox(
+                    width: deviceWidth * .04,
+                  ),
                 ),
                 GestureDetector(
                   onTap: () {
                     Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (builder) => Followers(me: widget.me)));
+                            builder: (builder) => Followers(me: widget.me,initialIndex: widget.me ? 0 : 1,username:widget.username)));
                   },
                   child: Column(
                     children: <Widget>[
@@ -277,15 +317,23 @@ class _ProfileState extends State<Profile> {
                     ],
                   ),
                 ),
-                SizedBox(
-                  width: deviceWidth * .04,
+                GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (builder) => Followers(me: widget.me,initialIndex: widget.me ? 1 : 2,username:widget.username)));
+                  },
+                  child: SizedBox(
+                    width: deviceWidth * .04,
+                  ),
                 ),
                 GestureDetector(
                   onTap: () {
                     Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (builder) => Followers(me: widget.me)));
+                            builder: (builder) => Followers(me: widget.me,initialIndex: widget.me ? 1 : 2,username:widget.username)));
                   },
                   child: Column(
                     children: <Widget>[
@@ -526,7 +574,23 @@ class _ProfileState extends State<Profile> {
                   width: deviceWidth * .02,
                 ),
                 GestureDetector(
-                  onTap: () {
+                  onTap: () async {
+                    if(!isvisible){
+                      SharedPreferences prefs = await SharedPreferences.getInstance();
+                      String token = prefs.getString('token') as String;
+                      final response = await http.get(Uri.parse("${url}user/follow_suggestion/"),
+                          headers: <String, String>{'Authorization': token},
+                          );
+                      if (response.statusCode == 200) {
+                        var data = jsonDecode(jsonDecode(response.body)) as List;
+                        setState(() {
+                          suggestions = data.map((e) => SuggestionModel.fromJson(e)).toList();
+                        });
+                      }
+                      if (response.statusCode == 401) {
+                        logout(context);
+                      }
+                    }
                     setState(() {
                       isvisible = !isvisible;
                     });
@@ -591,13 +655,13 @@ class _ProfileState extends State<Profile> {
                     height: deviceWidth * .01,
                   ),
                   Container(
-                    height: deviceWidth * 0.55,
+                    height: deviceWidth * 0.6,
                     child: ListView(
                       scrollDirection: Axis.horizontal,
                       children: List.generate(
-                        17,
+                        suggestions.length,
                         (int index) {
-                          return FollowCard();
+                          return FollowCard(profile: suggestions[index]);
                         },
                       ),
                     ),
@@ -721,6 +785,7 @@ class _ProfileState extends State<Profile> {
             ),
           ],
         ),
+        bottomNavigationBar: widget.me ? null : BottomNavTemp(),
       ),
     );
   }

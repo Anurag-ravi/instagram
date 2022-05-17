@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:instagram/components/profilecard.dart';
+import 'package:instagram/models/followmodel.dart';
 
 class Search extends StatefulWidget {
   const Search({Key? key}) : super(key: key);
@@ -91,7 +92,7 @@ class _SearchState extends State<Search> {
               child: ListView(
                 children: List.generate(
                     10,
-                    (index) => ProfileCard(),
+                    (index) => ProfileCard(profile: FollowModel('','username','name',false),),
               ),
             )
             )

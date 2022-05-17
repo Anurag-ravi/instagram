@@ -1,31 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:instagram/components/cacheimage.dart';
-import 'package:instagram/screens/feed/activity.dart';
-import 'package:instagram/screens/feed/feed.dart';
-import 'package:instagram/screens/feed/profile.dart';
-import 'package:instagram/screens/feed/reels.dart';
-import 'package:instagram/screens/feed/search.dart';
+import 'package:instagram/screens/feedscreen.dart';
 import 'package:instagram/utilities/constants.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class FeedScreen extends StatefulWidget {
-  const FeedScreen({Key? key, required this.controller,this.tab = 0}) : super(key: key);
-  final PageController controller;
-  final int tab;
+class BottomNavTemp extends StatefulWidget {
+  const BottomNavTemp({ Key? key }) : super(key: key);
+
   @override
-  State<FeedScreen> createState() => _FeedScreenState();
+  State<BottomNavTemp> createState() => _BottomNavTempState();
 }
 
-class _FeedScreenState extends State<FeedScreen> {
-  int currIndex = 0;
+class _BottomNavTempState extends State<BottomNavTemp> {
+  final _controller = PageController(initialPage: 1);
   late SharedPreferences prefs;
 
   @override
   void initState() {
     // TODO: implement initState
     init();
-    currIndex = widget.tab;
     super.initState();
   }
 
@@ -38,18 +32,12 @@ class _FeedScreenState extends State<FeedScreen> {
   @override
   Widget build(BuildContext context) {
     double deviceWidth = MediaQuery.of(context).size.width;
-    return Scaffold(
-      body: currIndex == 0 ? Feed(controller: widget.controller) :
-      currIndex == 1 ? Search() :
-      currIndex == 2 ? Reels() :
-      currIndex == 3 ? Activity() :
-                       Profile(me: true,),
-      bottomNavigationBar: Container(
+    return Container(
         height: deviceWidth * 0.18,
         child: BottomNavigationBar(
           selectedFontSize: 0,
           unselectedFontSize: 0,
-          currentIndex: currIndex,
+          currentIndex: 4,
           showSelectedLabels: false,
           showUnselectedLabels: false,
           iconSize: deviceWidth * 0.07,
@@ -60,13 +48,11 @@ class _FeedScreenState extends State<FeedScreen> {
               label: '',
               icon: IconButton(
                 onPressed: () {
-                  setState(() {
-                    currIndex = 0;
-                  });
+                  Navigator.push(context, MaterialPageRoute(builder: (builder)=>FeedScreen(controller: _controller,tab: 0,)));
                 },
                 alignment: Alignment.topCenter,
                 icon: Image.asset(
-                  currIndex == 0 ? 'assets/bottomicons/home1.png' :'assets/bottomicons/home.png',
+                  'assets/bottomicons/home.png',
                   height: deviceWidth * 0.07,
                   width: deviceWidth * 0.07,
                 ),
@@ -76,13 +62,11 @@ class _FeedScreenState extends State<FeedScreen> {
               label: '',
               icon: IconButton(
                 onPressed: () {
-                  setState(() {
-                    currIndex = 1;
-                  });
+                  Navigator.push(context, MaterialPageRoute(builder: (builder)=>FeedScreen(controller: _controller,tab: 1,)));
                 },
                 alignment: Alignment.center,
                 icon: SvgPicture.asset(
-                  currIndex == 1 ? 'assets/bottomicons/search1.svg' :'assets/bottomicons/search0.svg',
+                  'assets/bottomicons/search0.svg',
                   height: deviceWidth * 0.07,
                   width: deviceWidth * 0.07,
                 ),
@@ -92,13 +76,11 @@ class _FeedScreenState extends State<FeedScreen> {
               label: '',
               icon: IconButton(
                 onPressed: () {
-                  setState(() {
-                    currIndex = 2;
-                  });
+                  Navigator.push(context, MaterialPageRoute(builder: (builder)=>FeedScreen(controller: _controller,tab: 2,)));
                 },
                 alignment: Alignment.center,
                 icon: Image.asset(
-                  currIndex == 2 ? 'assets/bottomicons/reel1.png' :'assets/bottomicons/reel.png',
+                  'assets/bottomicons/reel.png',
                   height: deviceWidth * 0.07,
                   width: deviceWidth * 0.07,
                 ),
@@ -108,13 +90,11 @@ class _FeedScreenState extends State<FeedScreen> {
               label: '',
               icon: IconButton(
                 onPressed: () {
-                  setState(() {
-                    currIndex = 3;
-                  });
+                  Navigator.push(context, MaterialPageRoute(builder: (builder)=>FeedScreen(controller: _controller,tab: 3,)));
                 },
                 alignment: Alignment.center,
                 icon: SvgPicture.asset(
-                  currIndex == 3 ? 'assets/bottomicons/heart2.svg' :'assets/bottomicons/heart0.svg',
+                  'assets/bottomicons/heart0.svg',
                   height: deviceWidth * 0.07,
                   width: deviceWidth * 0.07,
                 ),
@@ -124,22 +104,20 @@ class _FeedScreenState extends State<FeedScreen> {
               label: '',
               icon: IconButton(
                 onPressed: () {
-                  setState(() {
-                    currIndex = 4;
-                  });
+                  Navigator.push(context, MaterialPageRoute(builder: (builder)=>FeedScreen(controller: _controller,tab: 4,)));
                 },
                 alignment: Alignment.center,
                 icon: Stack(
                   alignment: Alignment.center,
                   children: [
                     CircleAvatar(
-                      radius: currIndex == 4 ? deviceWidth * 0.12 : 0,
+                      radius: deviceWidth * 0.12,
                       backgroundColor: secondaryColor(context)
                     ),
                     ClipOval(
                       child: Container(
-                        width: currIndex == 4 ? deviceWidth*0.075 : deviceWidth*0.15,
-                        height: currIndex == 4 ? deviceWidth*0.075 : deviceWidth*0.15,
+                        width: deviceWidth*0.075,
+                        height: deviceWidth*0.075,
                         child: ChachedImage(url: prefs.getString('dp')!),
                       ),
                     ),
@@ -149,7 +127,6 @@ class _FeedScreenState extends State<FeedScreen> {
               ),
           ],
         ),
-        ),
-      );
+        );
   }
 }

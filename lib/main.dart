@@ -25,7 +25,7 @@ class MyApp extends StatelessWidget {
             primary: Colors.white,
       ),),
       debugShowCheckedModeBanner: false,
-      home: prefs.getString('token') == null ? const Login() : const HomePage()
+      home: prefs.getString('token') == null ? Login(prefs: prefs,) : HomePage(prefs: prefs,)
     );
   }
 }
