@@ -10,9 +10,10 @@ import 'package:instagram/utilities/constants.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class FeedScreen extends StatefulWidget {
-  const FeedScreen({Key? key, required this.controller,this.tab = 0}) : super(key: key);
+  const FeedScreen({Key? key, required this.controller,this.tab = 0,required this.prefs}) : super(key: key);
   final PageController controller;
   final int tab;
+  final SharedPreferences prefs;
   @override
   State<FeedScreen> createState() => _FeedScreenState();
 }
@@ -140,7 +141,7 @@ class _FeedScreenState extends State<FeedScreen> {
                       child: Container(
                         width: currIndex == 4 ? deviceWidth*0.075 : deviceWidth*0.15,
                         height: currIndex == 4 ? deviceWidth*0.075 : deviceWidth*0.15,
-                        child: ChachedImage(url: prefs.getString('dp')!),
+                        child: ChachedImage(url: widget.prefs.getString('dp')!),
                       ),
                     ),
                   ],

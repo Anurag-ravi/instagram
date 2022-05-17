@@ -48,7 +48,7 @@ class _BottomNavTempState extends State<BottomNavTemp> {
               label: '',
               icon: IconButton(
                 onPressed: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (builder)=>FeedScreen(controller: _controller,tab: 0,)));
+                  Navigator.push(context, MaterialPageRoute(builder: (builder)=>FeedScreen(controller: _controller,tab: 0,prefs: prefs,)));
                 },
                 alignment: Alignment.topCenter,
                 icon: Image.asset(
@@ -62,7 +62,7 @@ class _BottomNavTempState extends State<BottomNavTemp> {
               label: '',
               icon: IconButton(
                 onPressed: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (builder)=>FeedScreen(controller: _controller,tab: 1,)));
+                  Navigator.push(context, MaterialPageRoute(builder: (builder)=>FeedScreen(controller: _controller,tab: 1,prefs: prefs)));
                 },
                 alignment: Alignment.center,
                 icon: SvgPicture.asset(
@@ -76,7 +76,7 @@ class _BottomNavTempState extends State<BottomNavTemp> {
               label: '',
               icon: IconButton(
                 onPressed: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (builder)=>FeedScreen(controller: _controller,tab: 2,)));
+                  Navigator.push(context, MaterialPageRoute(builder: (builder)=>FeedScreen(controller: _controller,tab: 2,prefs: prefs)));
                 },
                 alignment: Alignment.center,
                 icon: Image.asset(
@@ -90,7 +90,7 @@ class _BottomNavTempState extends State<BottomNavTemp> {
               label: '',
               icon: IconButton(
                 onPressed: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (builder)=>FeedScreen(controller: _controller,tab: 3,)));
+                  Navigator.push(context, MaterialPageRoute(builder: (builder)=>FeedScreen(controller: _controller,tab: 3,prefs: prefs)));
                 },
                 alignment: Alignment.center,
                 icon: SvgPicture.asset(
@@ -104,7 +104,7 @@ class _BottomNavTempState extends State<BottomNavTemp> {
               label: '',
               icon: IconButton(
                 onPressed: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (builder)=>FeedScreen(controller: _controller,tab: 4,)));
+                  Navigator.push(context, MaterialPageRoute(builder: (builder)=>FeedScreen(controller: _controller,tab: 4,prefs: prefs)));
                 },
                 alignment: Alignment.center,
                 icon: Stack(
