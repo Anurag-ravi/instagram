@@ -40,6 +40,7 @@ class _FeedScreenState extends State<FeedScreen> {
   Widget build(BuildContext context) {
     double deviceWidth = MediaQuery.of(context).size.width;
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       body: currIndex == 0 ? Feed(controller: widget.controller) :
       currIndex == 1 ? Search() :
       currIndex == 2 ? Reels() :

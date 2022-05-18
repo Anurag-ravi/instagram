@@ -58,7 +58,7 @@ class _FollowListState extends State<FollowList> {
         Expanded(
             child: widget.issuggestions ? 
             GridView.builder(
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                             crossAxisCount: 2),
               itemCount: widget.suggestionlist.length,
               itemBuilder: (context, index) {
@@ -68,7 +68,7 @@ class _FollowListState extends State<FollowList> {
             :ListView(
             children: List.generate(
             widget.followlist.length,
-              (index) => ProfileCard(profile: widget.followlist[index]),
+              (index) => ProfileCard(profile: widget.followlist[index],profile2: SuggestionModel('', 'username', 'name', false, false, 'followedBy'),),
             ),
         ))
       ],
