@@ -41,7 +41,7 @@ class _FeedScreenState extends State<FeedScreen> {
     double deviceWidth = MediaQuery.of(context).size.width;
     return Scaffold(
       resizeToAvoidBottomInset: false,
-      body: currIndex == 0 ? Feed(controller: widget.controller) :
+      body: currIndex == 0 ? Feed(controller: widget.controller,prefs: widget.prefs,) :
       currIndex == 1 ? Search() :
       currIndex == 2 ? Reels() :
       currIndex == 3 ? Activity() :
@@ -142,7 +142,7 @@ class _FeedScreenState extends State<FeedScreen> {
                       child: Container(
                         width: currIndex == 4 ? deviceWidth*0.075 : deviceWidth*0.15,
                         height: currIndex == 4 ? deviceWidth*0.075 : deviceWidth*0.15,
-                        child: ChachedImage(url: widget.prefs.getString('dp')!),
+                        child: widget.prefs.getString('dp')! == '' ? Image.asset('assets/avatar.png') : ChachedImage(url: widget.prefs.getString('dp')!),
                       ),
                     ),
                   ],

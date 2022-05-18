@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:instagram/components/cacheimage.dart';
+import 'package:instagram/models/postmodel.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class PostCard extends StatefulWidget {
-  const PostCard({Key? key}) : super(key: key);
+  const PostCard({Key? key,required this.post,required this.prefs}) : super(key: key);
+  final PostModel post;
+  final SharedPreferences prefs;
 
   @override
   State<PostCard> createState() => _PostCardState();
@@ -13,8 +18,6 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
   late AnimationController animationController;
   late Animation<Matrix4> animation;
 
-  bool isliked = false;
-  bool issaved = false;
   bool isheartanimated = false;
 
   @override
@@ -47,40 +50,51 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
             children: <Widget>[
               Expanded(
                 flex: 2,
-                child: CircleAvatar(
-                  backgroundImage: AssetImage("assets/avatar.png"),
-                  radius: deviceWidth * 0.06,
+                child: Padding(
+                  padding: const EdgeInsets.all(5.5),
+                  child: ClipOval(
+                    child: Container(
+                      // width: deviceWidth * 0.12,
+                      height: deviceWidth * 0.12,
+                      child: widget.post.authorDp != '' ? ChachedImage(url: widget.post.authorDp)
+                      : Image.asset("assets/avatar.png"),
+                    ),
+                  ),
                 ),
               ),
               Expanded(
-                flex: 9,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    SizedBox(
-                      height: deviceWidth * 0.03,
-                    ),
-                    Text(
-                      'uername',
-                      style: TextStyle(
-                        fontSize: deviceWidth * 0.04,
+                flex: 10,
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 5),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      SizedBox(
+                        height: deviceWidth * 0.02,
                       ),
-                    ),
-                    Row(
-                      children: [
-                        Text(
-                          'address',
-                          style: TextStyle(
-                            fontSize: deviceWidth * 0.03,
-                          ),
+                      Text(
+                        widget.post.authorUsername,
+                        style: TextStyle(
+                          fontSize: deviceWidth * 0.04,
+                          fontWeight: FontWeight.w500,
                         ),
-                      ],
-                    ),
-                    SizedBox(
-                      height: deviceWidth * 0.03,
-                    ),
-                  ],
+                      ),
+                      Row(
+                        children: [
+                          Text(
+                            widget.post.location,
+                            style: TextStyle(
+                              fontSize: deviceWidth * 0.03,
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(
+                        height: deviceWidth * 0.03,
+                      ),
+                    ],
+                  ),
                 ),
               ),
               Expanded(
@@ -113,11 +127,8 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
                   },
                   child: Container(
                     width: deviceWidth,
-                    child: Image.asset(
-                      "assets/post0.jpeg",
-                      fit: BoxFit.fill,
+                    child: ChachedImage(url: widget.post.imageurl),
                     ),
-                  ),
                 ),
                 Opacity(
                   opacity: isheartanimated ? 1: 0,
@@ -137,7 +148,7 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
             ),
             onDoubleTap: () {
               setState(() {
-                isliked = true;
+                widget.post.liked = true;
                 isheartanimated = true;
               });
             },
@@ -150,12 +161,12 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
               IconButton(
                 onPressed: () {
                   setState(() {
-                    isliked = !isliked;
+                    widget.post.liked = !widget.post.liked;
                   });
                 },
                 alignment: Alignment.topCenter,
                 icon: SvgPicture.asset(
-                    isliked ? 'assets/bottomicons/heart1.svg' : 'assets/bottomicons/heart0.svg',
+                    widget.post.liked ? 'assets/bottomicons/heart1.svg' : 'assets/bottomicons/heart0.svg',
                     height: deviceWidth * 0.07,
                     width: deviceWidth * 0.07,
                   ),
@@ -184,9 +195,9 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
               IconButton(
                 onPressed: () {
                   setState(() {
-                    issaved = !issaved;
+                    widget.post.saved = !widget.post.saved;
                   });
-                  if (issaved){
+                  if (widget.post.saved){
                     final snackbar = SnackBar(
                       content: const Text('Saved to collection'),
                       action: SnackBarAction(
@@ -194,7 +205,7 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
                         textColor: Colors.white,
                         onPressed: () {
                           setState(() {
-                            issaved = false;
+                            widget.post.saved = false;
                           });
                         },
                         ),
@@ -204,7 +215,7 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
                 },
                 alignment: Alignment.topCenter,
                 icon: Image.asset(
-                  issaved ? 'assets/savee.png' : 'assets/save.png',
+                  widget.post.saved ? 'assets/savee.png' : 'assets/save.png',
                   height: deviceWidth * 0.07,
                   width: deviceWidth * 0.07,
                 ),
@@ -216,16 +227,21 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
               SizedBox(
                 width: deviceWidth * 0.04,
               ),
-              CircleAvatar(
-                backgroundImage: AssetImage("assets/avatar.png"),
+              widget.post.firstLikeDp == '' ? CircleAvatar(
+                backgroundImage: const AssetImage("assets/avatar.png"),
                 radius: deviceWidth * 0.03,
+              ) : ClipOval(
+                child: Container(
+                  width: deviceWidth * 0.06,
+                  height: deviceWidth * 0.06,
+                  child: ChachedImage(url: widget.post.firstLikeDp)),
               ),
               SizedBox(
                 width: deviceWidth * 0.01,
               ),
               Flexible(
                 child: Text(
-                  'Liked by me and 50 others',
+                  'Liked by ${widget.post.liked ? 'me, ' : ''}${widget.post.firstLike != '' ? widget.post.firstLike+', ':''}${widget.post.liked || widget.post.firstLike != '' ? 'and ' : ''}${widget.post.likeCount} others',
                   overflow: TextOverflow.visible,
                   style: TextStyle(
                     fontSize: deviceWidth * 0.04,
@@ -245,7 +261,7 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
               ),
               Flexible(
                 child: Text(
-                  'username : hehe',
+                  '${widget.post.authorUsername} : ${widget.post.caption}',
                   overflow: TextOverflow.visible,
                   style: TextStyle(
                     fontSize: deviceWidth * 0.039,
@@ -263,7 +279,7 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
                 width: deviceWidth * 0.04,
               ),
               Text(
-                'View all 256 comments',
+                'View all ${widget.post.commentCount} comments',
                 style: TextStyle(
                   fontSize: deviceWidth * 0.037,
                   color: Colors.grey[500],
@@ -281,10 +297,13 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
               ),
               Expanded(
                 flex: 1,
-                child: CircleAvatar(
-                  backgroundImage: AssetImage("assets/avatar.png"),
-                  radius: deviceWidth * 0.042,
-                ),
+                child: ClipOval(
+                      child: Container(
+                        width: deviceWidth*0.084,
+                        height: deviceWidth*0.084,
+                        child: widget.prefs.getString('dp')! == '' ? Image.asset('assets/avatar.png') : ChachedImage(url: widget.prefs.getString('dp')!),
+                      ),
+                    ),
               ),
               SizedBox(
                 width: deviceWidth * 0.02,
@@ -334,7 +353,7 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
                 width: deviceWidth * 0.04,
               ),
               Text(
-                '2 mins ago ',
+                widget.post.ago,
                 style: TextStyle(
                   fontSize: deviceWidth * 0.031,
                   color: Colors.grey[500],

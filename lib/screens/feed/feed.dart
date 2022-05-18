@@ -1,98 +1,226 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:instagram/components/postcard.dart';
 import 'package:instagram/components/storycard.dart';
+import 'package:instagram/data.dart';
+import 'package:instagram/models/postmodel.dart';
+import 'package:instagram/utilities/constants.dart';
+import 'package:instagram/utilities/logout.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
+
 
 class Feed extends StatefulWidget {
-  const Feed({Key? key, required this.controller}) : super(key: key);
+  const Feed({Key? key, required this.controller,required this.prefs}) : super(key: key);
   final PageController controller;
+  final SharedPreferences prefs;
   @override
   State<Feed> createState() => _FeedState();
 }
 
 class _FeedState extends State<Feed> {
+  List<PostModel> posts = [];
+  int pagecount = 0;
+  late ScrollController _scrollController;
+
+  
+
+
+  Future<void> fetchposts() async {
+      String? token = widget.prefs.getString('token');
+      final response = await http.get(Uri.parse("${url}feed/${pagecount}/"),
+          headers: <String, String>{'Authorization': token!},);
+      if (response.statusCode == 200) {
+        var data = jsonDecode(response.body);
+        if(pagecount == 0){
+          setState(() {
+            posts = (data as List).map((e) => PostModel.fromJson(e)).toList();
+          });
+        }else{
+          setState(() {
+            posts.addAll((data as List).map((e) => PostModel.fromJson(e)).toList());
+          });
+        }
+        settoken(response);
+        return;
+      }
+      if (response.statusCode == 401) {
+        logout(context);
+        return;
+      }
+      const snackBar = SnackBar(
+      content: Text('Some Error occured 🥲'),
+      );
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+  }
+
+  void _setupScrollController() {
+    _scrollController = ScrollController();
+
+    _scrollController.addListener(_scrollListener);
+  }
+
+  void _scrollListener() {
+    if (_scrollController.offset >=
+        _scrollController.position.maxScrollExtent) {
+      setState(() {
+        pagecount = pagecount + 1;
+      });
+
+      fetchposts();
+    }
+  }
+
+  Future<void> refresh() async {
+    setState(() {
+      pagecount = 0;
+      posts = [];
+    });
+    fetchposts();
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    _setupScrollController();
+    fetchposts();
+    super.initState();
+  }
+
+
   @override
   Widget build(BuildContext context) {
     double deviceWidth = MediaQuery.of(context).size.width;
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: const Color(0xfff8faf8),
-        elevation: 0.0,
-        title: SizedBox(
-          height: deviceWidth * 0.12,
-          child: Image.asset("assets/instagram_logo.png"),
+    return RefreshIndicator(
+      onRefresh: refresh,
+      child: Scaffold(
+        appBar: AppBar(
+          backgroundColor: const Color(0xfff8faf8),
+          elevation: 0.0,
+          title: SizedBox(
+            height: deviceWidth * 0.12,
+            child: Image.asset("assets/instagram_logo.png"),
+          ),
+          actions: <Widget>[
+            IconButton(
+                onPressed: () {
+                  bottompopup1(context);
+                },
+                alignment: Alignment.center,
+                icon: SvgPicture.asset('assets/add.svg',
+                    height: deviceWidth * 0.09)),
+            IconButton(
+                onPressed: () {
+                  widget.controller.animateToPage(2,
+                      duration: const Duration(milliseconds: 500),
+                      curve: Curves.easeInOut);
+                },
+                alignment: Alignment.center,
+                icon: Stack(
+                  children: [
+                    SvgPicture.asset('assets/messenger.svg',
+                        height: deviceWidth * 0.08),
+                    Positioned(
+                      right: 0,
+                      top: 0,
+                      child: CircleAvatar(
+                        radius: deviceWidth * 0.025,
+                        child: Text('3',
+                            style: TextStyle(
+                                fontSize: deviceWidth * 0.035,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.white)),
+                        backgroundColor: Colors.red,
+                      ),
+                    )
+                  ],
+                )),
+          ],
         ),
-        actions: <Widget>[
-          IconButton(
-              onPressed: () {
-                bottompopup1(context);
-               },
-              alignment: Alignment.center,
-              icon: SvgPicture.asset('assets/add.svg',
-                  height: deviceWidth * 0.09)
-              ),
-          IconButton(
-              onPressed: () {
-                widget.controller.animateToPage(2,
-                    duration: const Duration(milliseconds: 500),
-                    curve: Curves.easeInOut);
-              },
-              alignment: Alignment.center,
-              icon: Stack(
-                children: [
-                  SvgPicture.asset('assets/messenger.svg',
-                      height: deviceWidth * 0.08),
-                  Positioned(
-                    right: 0,
-                    top: 0,
-                    child: CircleAvatar(
-                      radius: deviceWidth * 0.025,
-                      child: Text('3',style: TextStyle(fontSize: deviceWidth * 0.035,fontWeight: FontWeight.w600,color: Colors.white)),
-                      backgroundColor: Colors.red,
-                    ),
-                  )
-                ],
-              )
-              ),
-        ],
-      ),
-      body: CustomScrollView(
-        slivers: <Widget>[
-          SliverList(
-            delegate: SliverChildListDelegate(<Widget>[
-              const Divider(
-                height: 1,
-                thickness: 1,
-              ),
-              Container(
-                height: deviceWidth * 0.32,
-                child: ListView(
-                  scrollDirection: Axis.horizontal,
-                  children: List.generate(
-                    10,
-                    (int index) {
-                      return const StoryCard();
-                    },
-                  ),
+        body: Builder(
+                builder: (context) {
+                  if (posts.isEmpty) {
+                    return const Center(
+                      child: Text('Follow people to populate feed'),
+                    );
+                  }
+    
+                  return ListView.builder(
+                    controller: _scrollController,
+                    itemCount: posts.length + 4,
+                    itemBuilder: (BuildContext context, int index) {
+                      if(index == 0){
+                        return const Divider(
+                          height: 1,
+                          thickness: 1,
+                        );
+                      }
+                      if(index == 1){
+                        return Container(
+              height: deviceWidth * 0.32,
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                children: List.generate(
+                  10,
+                  (int index) {
+                    return const StoryCard();
+                  },
                 ),
               ),
-              const Divider(
-                height: 5,
-                thickness: 1,
-              )
-            ]),
-          ),
-          SliverList(
-            delegate: SliverChildListDelegate(
-              List.generate(
-                17,
-                (int index) {
-                  return PostCard();
+            );
+                      }
+                      if(index == 2){
+                        return const Divider(
+              height: 5,
+              thickness: 1,
+            );
+                      }
+                      if (index == posts.length + 3) {
+                        return ListTile(
+                          title: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: <Widget>[
+                              CircularProgressIndicator(color: secondaryColor(context),),
+                            ],
+                          ),
+                        );
+                      } else {
+                        return PostCard(post: posts[index-3], prefs: widget.prefs);
+                      }
+                    },
+                  );
                 },
               ),
-            ),
-          ),
-        ],
+        // body: ListView(
+        //   children: [
+        //     const Divider(
+        //       height: 1,
+        //       thickness: 1,
+        //     ),
+        //     Container(
+        //       height: deviceWidth * 0.32,
+        //       child: ListView(
+        //         scrollDirection: Axis.horizontal,
+        //         children: List.generate(
+        //           10,
+        //           (int index) {
+        //             return const StoryCard();
+        //           },
+        //         ),
+        //       ),
+        //     ),
+        //     const Divider(
+        //       height: 5,
+        //       thickness: 1,
+        //     ),
+        //     Container(
+        //       height: MediaQuery.of(context).size.height * 2,
+        //       child: 
+        //     ),
+        //   ],
+        // ),
       ),
     );
   }
@@ -122,9 +250,8 @@ void bottompopup1(context) {
                       width: devicewidth * 0.15,
                       height: 4,
                       decoration: BoxDecoration(
-                        color: Colors.black54,
-                        borderRadius: BorderRadius.circular(2)
-                      ),
+                          color: Colors.black54,
+                          borderRadius: BorderRadius.circular(2)),
                     ),
                   ),
                 ),
@@ -132,13 +259,13 @@ void bottompopup1(context) {
                   padding: const EdgeInsets.symmetric(vertical: 2),
                   child: Center(
                     child: Text(
-                        'Create',
-                        style: TextStyle(
-                          fontSize: devicewidth * 0.06,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.black54,
-                        ),
+                      'Create',
+                      style: TextStyle(
+                        fontSize: devicewidth * 0.06,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.black54,
                       ),
+                    ),
                   ),
                 ),
                 const Divider(
@@ -146,7 +273,8 @@ void bottompopup1(context) {
                   thickness: 1,
                 ),
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 5,vertical: 10),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 5, vertical: 10),
                   child: Row(
                     children: [
                       SizedBox(
@@ -171,7 +299,8 @@ void bottompopup1(context) {
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 5,vertical: 10),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 5, vertical: 10),
                   child: Row(
                     children: [
                       SizedBox(
@@ -196,7 +325,8 @@ void bottompopup1(context) {
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 5,vertical: 10),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 5, vertical: 10),
                   child: Row(
                     children: [
                       SizedBox(
@@ -221,7 +351,8 @@ void bottompopup1(context) {
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 5,vertical: 10),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 5, vertical: 10),
                   child: Row(
                     children: [
                       SizedBox(
@@ -246,7 +377,8 @@ void bottompopup1(context) {
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 5,vertical: 10),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 5, vertical: 10),
                   child: Row(
                     children: [
                       SizedBox(
