@@ -12,7 +12,9 @@ import 'package:instagram/data.dart';
 import 'package:instagram/models/profile.dart';
 import 'package:instagram/models/profile_short.dart';
 import 'package:instagram/models/suggestionmodel.dart';
+import 'package:instagram/screens/profile/editprofile.dart';
 import 'package:instagram/screens/profile/followers.dart';
+import 'package:instagram/utilities/constants.dart';
 import 'package:instagram/utilities/logout.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
@@ -31,6 +33,7 @@ class _ProfileState extends State<Profile> {
   final controller = PageController(initialPage: 0);
   bool following = true;
   bool isvisible = false;
+  bool loading = true;
   List<SuggestionModel> suggestions = [];
   ProfileModel profile = ProfileModel(
       0, 
@@ -53,6 +56,9 @@ class _ProfileState extends State<Profile> {
     // TODO: implement initState
     fetch();
     super.initState();
+    setState(() {
+      loading = false;
+    });
   }
 
   Future<void> fetch() async {
@@ -140,13 +146,15 @@ class _ProfileState extends State<Profile> {
     return RefreshIndicator(
       color: Colors.black,
       onRefresh: fetch,
-      child: Scaffold(
+      child: loading ? Scaffold(
+        body: Center(child: CircularProgressIndicator(color: secondaryColor(context),),),
+      ) : Scaffold(
         appBar: AppBar(
           backgroundColor: const Color(0xfff8faf8),
           elevation: 0.5,
           centerTitle: false,
           leading: widget.me
-              ? null
+              ? Container()
               : IconButton(
                   onPressed: () {
                     Navigator.pop(context);
@@ -511,9 +519,6 @@ class _ProfileState extends State<Profile> {
                     : GestureDetector(
                         onTap: () {
                           follow();
-                          // setState(() {
-                          //   profile.meFollowing = !profile.meFollowing;
-                          // });
                         },
                         child: Container(
                           width: deviceWidth * 0.39,
@@ -547,8 +552,8 @@ class _ProfileState extends State<Profile> {
                   width: deviceWidth * .02,
                 ),
                 GestureDetector(
-                  // onTap: () =>
-                  //     Navigator.pushNamed(context, '/editprofile'),
+                  onTap: () =>
+                      Navigator.push(context, MaterialPageRoute(builder: (builder)=>EditProfile(profile: profile,))),
                   child: Container(
                     width: widget.me ? deviceWidth * .81 : deviceWidth * 0.39,
                     height: deviceWidth * .11,
