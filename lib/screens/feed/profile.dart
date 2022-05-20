@@ -552,8 +552,9 @@ class _ProfileState extends State<Profile> {
                   width: deviceWidth * .02,
                 ),
                 GestureDetector(
-                  onTap: () =>
-                      Navigator.push(context, MaterialPageRoute(builder: (builder)=>EditProfile(profile: profile,))),
+                  onTap: () {
+                      widget.me ? Navigator.push(context, MaterialPageRoute(builder: (builder)=>EditProfile(profile: profile,))) : null;
+                  },
                   child: Container(
                     width: widget.me ? deviceWidth * .81 : deviceWidth * 0.39,
                     height: deviceWidth * .11,

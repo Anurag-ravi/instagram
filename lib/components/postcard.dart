@@ -1,13 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:instagram/components/cacheimage.dart';
+import 'package:instagram/data.dart';
 import 'package:instagram/models/postmodel.dart';
+import 'package:instagram/screens/posts/postdetail.dart';
+import 'package:instagram/utilities/logout.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
+
 
 class PostCard extends StatefulWidget {
-  const PostCard({Key? key,required this.post,required this.prefs}) : super(key: key);
+  const PostCard({Key? key,required this.post,required this.prefs,this.isdetail = false}) : super(key: key);
   final PostModel post;
   final SharedPreferences prefs;
+  final bool isdetail;
 
   @override
   State<PostCard> createState() => _PostCardState();
@@ -35,6 +41,50 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
     super.dispose();
     controller.dispose();
     animationController.dispose();
+  }
+
+
+  Future<void> like() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? token = prefs.getString('token');
+      final response = await http.get(Uri.parse("${url}post/like/${widget.post.id}/"),
+          headers: <String, String>{'Authorization': token!},
+          );
+      if (response.statusCode == 200) {
+        setState(() {
+          widget.post.liked = !widget.post.liked;
+        });
+        return;
+      }
+      if (response.statusCode == 401) {
+        logout(context);
+        return;
+      }
+      const snackBar = SnackBar(
+      content: Text('Some Error occured 🥲'),
+      );
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+  }
+  Future<void> save() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? token = prefs.getString('token');
+      final response = await http.get(Uri.parse("${url}post/save/${widget.post.id}/"),
+          headers: <String, String>{'Authorization': token!},
+          );
+      if (response.statusCode == 200) {
+        setState(() {
+          widget.post.saved = !widget.post.saved;
+        });
+        return;
+      }
+      if (response.statusCode == 401) {
+        logout(context);
+        return;
+      }
+      const snackBar = SnackBar(
+      content: Text('Some Error occured 🥲'),
+      );
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 
 
@@ -97,7 +147,7 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
                   ),
                 ),
               ),
-              Expanded(
+              widget.isdetail ? Container() : Expanded(
                 flex: 1,
                 child: IconButton(
                   onPressed: () {
@@ -148,9 +198,11 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
             ),
             onDoubleTap: () {
               setState(() {
-                widget.post.liked = true;
                 isheartanimated = true;
               });
+              if(!widget.post.liked){
+                like();
+              }
             },
           ),
           Row(
@@ -160,9 +212,7 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
               ),
               IconButton(
                 onPressed: () {
-                  setState(() {
-                    widget.post.liked = !widget.post.liked;
-                  });
+                  like();
                 },
                 alignment: Alignment.topCenter,
                 icon: SvgPicture.asset(
@@ -172,7 +222,9 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
                   ),
               ),
               IconButton(
-                onPressed: () {},
+                onPressed: () {
+                  widget.isdetail ? null : Navigator.push(context, MaterialPageRoute(builder: (builder)=>PostDetail(post: widget.post, comments: [],prefs: widget.prefs,)));
+                },
                 alignment: Alignment.topCenter,
                 icon: SvgPicture.asset(
                   'assets/comment.svg',
@@ -193,17 +245,16 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
                 width: deviceWidth * 0.45,
               ),
               IconButton(
-                onPressed: () {
-                  setState(() {
-                    widget.post.saved = !widget.post.saved;
-                  });
+                onPressed: () async{
+                  await save();
                   if (widget.post.saved){
                     final snackbar = SnackBar(
                       content: const Text('Saved to collection'),
                       action: SnackBarAction(
                         label: 'Undo',
                         textColor: Colors.white,
-                        onPressed: () {
+                        onPressed: () async {
+                          await save();
                           setState(() {
                             widget.post.saved = false;
                           });
@@ -273,76 +324,86 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
           SizedBox(
             height: deviceWidth * 0.018,
           ),
-          Row(
-            children: <Widget>[
-              SizedBox(
-                width: deviceWidth * 0.04,
-              ),
-              Text(
-                'View all ${widget.post.commentCount} comments',
-                style: TextStyle(
-                  fontSize: deviceWidth * 0.037,
-                  color: Colors.grey[500],
+          widget.isdetail ? Container() : GestureDetector(
+            onTap: () {
+              Navigator.push(context, MaterialPageRoute(builder: (builder)=>PostDetail(post: widget.post, comments: [],prefs: widget.prefs,)));
+            },
+            child: Row(
+              children: <Widget>[
+                SizedBox(
+                  width: deviceWidth * 0.04,
                 ),
-              ),
-            ],
-          ),
-          SizedBox(
-            height: deviceWidth * 0.02,
-          ),
-          Row(
-            children: <Widget>[
-              SizedBox(
-                width: deviceWidth * 0.04,
-              ),
-              Expanded(
-                flex: 1,
-                child: ClipOval(
-                      child: Container(
-                        width: deviceWidth*0.084,
-                        height: deviceWidth*0.084,
-                        child: widget.prefs.getString('dp')! == '' ? Image.asset('assets/avatar.png') : ChachedImage(url: widget.prefs.getString('dp')!),
-                      ),
-                    ),
-              ),
-              SizedBox(
-                width: deviceWidth * 0.02,
-              ),
-              Expanded(
-                flex: 8,
-                child: Text(
-                  'Add a comment',
+                Text(
+                  'View all ${widget.post.commentCount} comments',
                   style: TextStyle(
-                    fontSize: deviceWidth * 0.034,
+                    fontSize: deviceWidth * 0.037,
                     color: Colors.grey[500],
                   ),
                 ),
-              ),
-              Expanded(
-                flex: 1,
-                child: Text(
-                  '❤',
-                  style: TextStyle(
-                    fontSize: deviceWidth * 0.035,
-                  ),
+              ],
+            ),
+          ),
+          widget.isdetail ? Container() : SizedBox(
+            height: deviceWidth * 0.02,
+          ),
+          widget.isdetail ? Container() : GestureDetector(
+            onTap: () {
+              Navigator.push(context, MaterialPageRoute(builder: (builder)=>PostDetail(post: widget.post, comments: [],prefs: widget.prefs,)));
+            },
+            child: Row(
+              children: <Widget>[
+                SizedBox(
+                  width: deviceWidth * 0.04,
                 ),
-              ),
-              Expanded(
-                flex: 1,
-                child: Text(
-                  ' 🙌',
-                  style: TextStyle(
-                    fontSize: deviceWidth * 0.035,
-                  ),
-                ),
-              ),
-              Expanded(
+                Expanded(
                   flex: 1,
-                  child: Icon(
-                    Icons.add_circle_outline,
-                    size: deviceWidth * 0.04,
-                  )),
-            ],
+                  child: ClipOval(
+                        child: Container(
+                          width: deviceWidth*0.084,
+                          height: deviceWidth*0.084,
+                          child: widget.prefs.getString('dp')! == '' ? Image.asset('assets/avatar.png') : ChachedImage(url: widget.prefs.getString('dp')!),
+                        ),
+                      ),
+                ),
+                SizedBox(
+                  width: deviceWidth * 0.02,
+                ),
+                Expanded(
+                  flex: 8,
+                  child: Text(
+                    'Add a comment',
+                    style: TextStyle(
+                      fontSize: deviceWidth * 0.034,
+                      color: Colors.grey[500],
+                    ),
+                  ),
+                ),
+                Expanded(
+                  flex: 1,
+                  child: Text(
+                    '❤',
+                    style: TextStyle(
+                      fontSize: deviceWidth * 0.035,
+                    ),
+                  ),
+                ),
+                Expanded(
+                  flex: 1,
+                  child: Text(
+                    ' 🙌',
+                    style: TextStyle(
+                      fontSize: deviceWidth * 0.035,
+                    ),
+                  ),
+                ),
+                Expanded(
+                    flex: 1,
+                    child: Icon(
+                      Icons.add_circle_outline,
+                      size: deviceWidth * 0.04,
+                    )),
+              ],
+            ),
           ),
           SizedBox(
             height: deviceWidth * 0.02,
@@ -385,71 +446,7 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
 
     animationController.forward(from: 0);
   }
-}
-
-class HeartAnimationWidget extends StatefulWidget {
-  const HeartAnimationWidget({ Key? key,required this.child,required this.isAnimating,this.duration = const Duration(milliseconds: 150),required this.onEnd }) : super(key: key);
-  
-  final Widget child;
-  final bool isAnimating;
-  final Duration duration;
-  final VoidCallback onEnd;
-
-  @override
-  State<HeartAnimationWidget> createState() => _HeartAnimationWidgetState();
-}
-
-class _HeartAnimationWidgetState extends State<HeartAnimationWidget> with SingleTickerProviderStateMixin {
-  late AnimationController controller;
-  late Animation<double> scale;
-
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-    final halfDuration = widget.duration.inMilliseconds ~/2;
-    controller = AnimationController(
-      vsync: this,
-      duration: Duration(milliseconds: halfDuration)
-      );
-
-      scale = Tween<double>(begin: 0.9,end: 1.2).animate(controller);
-  }
-
-  @override
-  void didUpdateWidget(covariant HeartAnimationWidget oldWidget) {
-    // TODO: implement didUpdateWidget
-    super.didUpdateWidget(oldWidget);
-
-    if(widget.isAnimating != oldWidget.isAnimating){
-      doAnimation();
-    }
-  }
-  Future doAnimation() async {
-    await controller.forward();
-    await controller.reverse();
-
-    if( widget.onEnd != null){
-      widget.onEnd();
-    }
-  }
-
-  @override
-  void dispose() {
-    // TODO: implement dispose
-    super.dispose();
-
-    controller.dispose();
-  }
-  @override
-  Widget build(BuildContext context) => ScaleTransition(
-    scale: scale,
-    child: widget.child
-    );
-
-}
-
-void bottompopup(context) {
+  void bottompopup(context) {
   double devicewidth = MediaQuery.of(context).size.width;
   showModalBottomSheet(
       context: context,
@@ -560,3 +557,68 @@ void bottompopup(context) {
         );
       });
 }
+}
+
+class HeartAnimationWidget extends StatefulWidget {
+  const HeartAnimationWidget({ Key? key,required this.child,required this.isAnimating,this.duration = const Duration(milliseconds: 150),required this.onEnd }) : super(key: key);
+  
+  final Widget child;
+  final bool isAnimating;
+  final Duration duration;
+  final VoidCallback onEnd;
+
+  @override
+  State<HeartAnimationWidget> createState() => _HeartAnimationWidgetState();
+}
+
+class _HeartAnimationWidgetState extends State<HeartAnimationWidget> with SingleTickerProviderStateMixin {
+  late AnimationController controller;
+  late Animation<double> scale;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    final halfDuration = widget.duration.inMilliseconds ~/2;
+    controller = AnimationController(
+      vsync: this,
+      duration: Duration(milliseconds: halfDuration)
+      );
+
+      scale = Tween<double>(begin: 0.9,end: 1.2).animate(controller);
+  }
+
+  @override
+  void didUpdateWidget(covariant HeartAnimationWidget oldWidget) {
+    // TODO: implement didUpdateWidget
+    super.didUpdateWidget(oldWidget);
+
+    if(widget.isAnimating != oldWidget.isAnimating){
+      doAnimation();
+    }
+  }
+  Future doAnimation() async {
+    await controller.forward();
+    await controller.reverse();
+
+    if( widget.onEnd != null){
+      widget.onEnd();
+    }
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+
+    controller.dispose();
+  }
+  @override
+  Widget build(BuildContext context) => ScaleTransition(
+    scale: scale,
+    child: widget.child
+    );
+
+}
+
+

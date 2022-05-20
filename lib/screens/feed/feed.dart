@@ -6,6 +6,7 @@ import 'package:instagram/components/postcard.dart';
 import 'package:instagram/components/storycard.dart';
 import 'package:instagram/data.dart';
 import 'package:instagram/models/postmodel.dart';
+import 'package:instagram/screens/posts/postcreate.dart';
 import 'package:instagram/utilities/constants.dart';
 import 'package:instagram/utilities/logout.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -193,34 +194,6 @@ class _FeedState extends State<Feed> {
                   );
                 },
               ),
-        // body: ListView(
-        //   children: [
-        //     const Divider(
-        //       height: 1,
-        //       thickness: 1,
-        //     ),
-        //     Container(
-        //       height: deviceWidth * 0.32,
-        //       child: ListView(
-        //         scrollDirection: Axis.horizontal,
-        //         children: List.generate(
-        //           10,
-        //           (int index) {
-        //             return const StoryCard();
-        //           },
-        //         ),
-        //       ),
-        //     ),
-        //     const Divider(
-        //       height: 5,
-        //       thickness: 1,
-        //     ),
-        //     Container(
-        //       height: MediaQuery.of(context).size.height * 2,
-        //       child: 
-        //     ),
-        //   ],
-        // ),
       ),
     );
   }
@@ -272,35 +245,40 @@ void bottompopup1(context) {
                   height: 5,
                   thickness: 1,
                 ),
-                Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 5, vertical: 10),
-                  child: Row(
-                    children: [
-                      SizedBox(
-                        width: devicewidth * 0.05,
-                      ),
-                      Icon(
-                        Icons.grid_3x3_rounded,
-                        size: devicewidth * 0.07,
-                        color: Colors.black54,
-                      ),
-                      SizedBox(
-                        width: devicewidth * 0.02,
-                      ),
-                      Text(
-                        'Post',
-                        style: TextStyle(
-                          fontSize: devicewidth * 0.055,
+                GestureDetector(
+                  onTap: () {
+                    Navigator.push(context, MaterialPageRoute(builder: (builder)=>PostCreate()));
+                  },
+                  child: Padding(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 5, vertical: 15),
+                    child: Row(
+                      children: [
+                        SizedBox(
+                          width: devicewidth * 0.05,
+                        ),
+                        Icon(
+                          Icons.view_module_outlined,
+                          size: devicewidth * 0.07,
                           color: Colors.black54,
                         ),
-                      ),
-                    ],
+                        SizedBox(
+                          width: devicewidth * 0.03,
+                        ),
+                        Text(
+                          'Post',
+                          style: TextStyle(
+                            fontSize: devicewidth * 0.055,
+                            color: Colors.black54,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
                 Padding(
                   padding:
-                      const EdgeInsets.symmetric(horizontal: 5, vertical: 10),
+                      const EdgeInsets.symmetric(horizontal: 5, vertical: 15),
                   child: Row(
                     children: [
                       SizedBox(
@@ -312,7 +290,7 @@ void bottompopup1(context) {
                         color: Colors.black54,
                       ),
                       SizedBox(
-                        width: devicewidth * 0.02,
+                        width: devicewidth * 0.03,
                       ),
                       Text(
                         'Reels',
@@ -326,7 +304,7 @@ void bottompopup1(context) {
                 ),
                 Padding(
                   padding:
-                      const EdgeInsets.symmetric(horizontal: 5, vertical: 10),
+                      const EdgeInsets.symmetric(horizontal: 5, vertical: 15),
                   child: Row(
                     children: [
                       SizedBox(
@@ -338,7 +316,7 @@ void bottompopup1(context) {
                         color: Colors.black54,
                       ),
                       SizedBox(
-                        width: devicewidth * 0.02,
+                        width: devicewidth * 0.03,
                       ),
                       Text(
                         'Story',
@@ -352,7 +330,7 @@ void bottompopup1(context) {
                 ),
                 Padding(
                   padding:
-                      const EdgeInsets.symmetric(horizontal: 5, vertical: 10),
+                      const EdgeInsets.symmetric(horizontal: 5, vertical: 15),
                   child: Row(
                     children: [
                       SizedBox(
@@ -364,7 +342,7 @@ void bottompopup1(context) {
                         color: Colors.black54,
                       ),
                       SizedBox(
-                        width: devicewidth * 0.02,
+                        width: devicewidth * 0.03,
                       ),
                       Text(
                         'Story Highlight',
@@ -378,7 +356,7 @@ void bottompopup1(context) {
                 ),
                 Padding(
                   padding:
-                      const EdgeInsets.symmetric(horizontal: 5, vertical: 10),
+                      const EdgeInsets.symmetric(horizontal: 5, vertical: 15),
                   child: Row(
                     children: [
                       SizedBox(
@@ -390,7 +368,7 @@ void bottompopup1(context) {
                         color: Colors.black54,
                       ),
                       SizedBox(
-                        width: devicewidth * 0.02,
+                        width: devicewidth * 0.03,
                       ),
                       Text(
                         'Live',
@@ -408,3 +386,4 @@ void bottompopup1(context) {
         );
       });
 }
+

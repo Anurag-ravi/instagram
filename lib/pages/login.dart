@@ -286,6 +286,7 @@ class _LoginState extends State<Login> {
       if(response.statusCode == 200){
         widget.prefs.setString('token', data['jwt']);
         widget.prefs.setString('username', data['username']);
+        widget.prefs.setInt('id', data['id']);
         widget.prefs.setString('dp', data['dp']);
         const snackBar = SnackBar(
         content: Text('Succcessfully Logged in'),
