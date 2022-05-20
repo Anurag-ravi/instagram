@@ -894,11 +894,11 @@ class _ProfileState extends State<Profile> {
   }
 }
 
-void bottompopup(context) {
+void bottompopup(context) async{
   double devicewidth = MediaQuery.of(context).size.width;
-  showModalBottomSheet(
+  await showModalBottomSheet<void>(
       context: context,
-      builder: (BuildContext bc) {
+      builder: (context) {
         return Flexible(
           child: Container(
             decoration: const BoxDecoration(
