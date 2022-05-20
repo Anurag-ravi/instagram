@@ -3,6 +3,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:instagram/components/cacheimage.dart';
 import 'package:instagram/data.dart';
 import 'package:instagram/models/postmodel.dart';
+import 'package:instagram/screens/posts/postcreate.dart';
 import 'package:instagram/screens/posts/postdetail.dart';
 import 'package:instagram/utilities/logout.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -25,6 +26,7 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
   late Animation<Matrix4> animation;
 
   bool isheartanimated = false;
+  bool isdeleted = false;
 
   @override
   void initState() {
@@ -87,11 +89,34 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
       ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 
+   Future<void> delete() async {
+    FocusManager.instance.primaryFocus!.unfocus();
+    String? token = widget.prefs.getString('token');
+    final response = await http.delete(
+      Uri.parse("${url}post/delete/${widget.post.id}/"),
+      headers: <String, String>{'Authorization': token!},
+    );
+    if (response.statusCode == 204) {
+      setState(() {
+       isdeleted = true;
+      });
+      return;
+    }
+    if (response.statusCode == 401) {
+      logout(context);
+      return;
+    }
+    const snackBar = SnackBar(
+      content: Text('Some Error occured 🥲'),
+    );
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+  }
+
 
   @override
   Widget build(BuildContext context) {
     double deviceWidth = MediaQuery.of(context).size.width;
-    return Padding(
+    return isdeleted ? Container() : Padding(
       padding: const EdgeInsets.symmetric(vertical: 5),
       child: Column(
         children: <Widget>[
@@ -151,7 +176,7 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
                 flex: 1,
                 child: IconButton(
                   onPressed: () {
-                    bottompopup(context);
+                    bottompopup(context,widget.post.authorUsername,widget.prefs.getString('username')!);
                   },
                   icon: Icon(
                     Icons.more_vert,
@@ -446,7 +471,7 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
 
     animationController.forward(from: 0);
   }
-  void bottompopup(context) {
+  void bottompopup(context,author,me) {
   double devicewidth = MediaQuery.of(context).size.width;
   showModalBottomSheet(
       context: context,
@@ -459,7 +484,7 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
               topRight: Radius.circular(30),
             ),
           ),
-          height: devicewidth * 0.5,
+          height: author != me ? devicewidth * 0.5 : devicewidth * 0.7,
           child: Flexible(
             child: ListView(
               children: [
@@ -551,6 +576,71 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
                     ],
                   ),
                 ),
+                author == me ? GestureDetector(
+                  onTap: () {
+                    Navigator.push(context, MaterialPageRoute(builder: (builder)=>PostCreate(caption: widget.post.caption,id: widget.post.id,location: widget.post.location,updating: true,url: widget.post.imageurl,)));
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 5,vertical: 10),
+                    child: Row(
+                      children: [
+                        SizedBox(
+                          width: devicewidth * 0.05,
+                        ),
+                        Icon(
+                          Icons.edit,
+                          size: devicewidth * 0.07,
+                          color: Colors.black54,
+                        ),
+                        SizedBox(
+                          width: devicewidth * 0.025,
+                        ),
+                        Text(
+                          'Update',
+                          style: TextStyle(
+                            fontSize: devicewidth * 0.055,
+                            color: Colors.black54,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ) : Container(),
+                author == me ? GestureDetector(
+                  onTap: () {
+                    delete();
+                    Navigator.pop(context);
+                    const snackBar = SnackBar(
+                    content: Text('Post Deleted 🥲'),
+                    );
+                    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 5,vertical: 10),
+                    child: Row(
+                      children: [
+                        SizedBox(
+                          width: devicewidth * 0.05,
+                        ),
+                        Icon(
+                          Icons.delete_outline_rounded,
+                          size: devicewidth * 0.07,
+                          color: Colors.red,
+                        ),
+                        SizedBox(
+                          width: devicewidth * 0.025,
+                        ),
+                        Text(
+                          'Delete',
+                          style: TextStyle(
+                            fontSize: devicewidth * 0.055,
+                            color: Colors.black54,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ) : Container(),
               ],
             ),
           ),

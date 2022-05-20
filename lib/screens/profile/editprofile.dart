@@ -393,16 +393,12 @@ class _EditProfileState extends State<EditProfile> {
       FocusManager.instance.primaryFocus?.unfocus();
       final _picker = ImagePicker();
       var image = await _picker.pickImage(source: ImageSource.gallery);
-      print("=============================");
-      print(image);
-      print(image!.path);
       setState(() {
-        _pickedimg = File(image.path);
+        _pickedimg = File(image!.path);
         imgpicked = true;
       });
     } catch(e) {
-      print("=============================");
-      print(e);
+      return;
     }
   }
 }

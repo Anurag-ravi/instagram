@@ -203,7 +203,7 @@ class _PostDetailState extends State<PostDetail> {
           actions: [
             IconButton(
               onPressed: () {
-                Navigator.pop(context);
+                bottompopup(context);
               },
               icon: Icon(
                 Icons.more_vert_rounded,
