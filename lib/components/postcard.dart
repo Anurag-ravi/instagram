@@ -474,8 +474,10 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
   void bottompopup(context,author,me) {
   double devicewidth = MediaQuery.of(context).size.width;
   showModalBottomSheet(
+      isScrollControlled: true,
+      enableDrag: true,
       context: context,
-      builder: (BuildContext bc) {
+      builder: (context) {
         return Container(
           decoration: const BoxDecoration(
             color: Colors.white,
@@ -485,23 +487,101 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
             ),
           ),
           height: author != me ? devicewidth * 0.5 : devicewidth * 0.7,
-          child: Flexible(
-            child: ListView(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 5),
-                  child: Center(
-                    child: Container(
-                      width: devicewidth * 0.15,
-                      height: 4,
-                      decoration: BoxDecoration(
-                        color: Colors.black54,
-                        borderRadius: BorderRadius.circular(2)
-                      ),
+          child: ListView(
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 5),
+                child: Center(
+                  child: Container(
+                    width: devicewidth * 0.15,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: Colors.black54,
+                      borderRadius: BorderRadius.circular(2)
                     ),
                   ),
                 ),
-                Padding(
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 5,vertical: 10),
+                child: Row(
+                  children: [
+                    SizedBox(
+                      width: devicewidth * 0.05,
+                    ),
+                    Icon(
+                      Icons.report,
+                      size: devicewidth * 0.07,
+                      color: Colors.redAccent[100],
+                    ),
+                    SizedBox(
+                      width: devicewidth * 0.025,
+                    ),
+                    Text(
+                      'Report',
+                      style: TextStyle(
+                        fontSize: devicewidth * 0.055,
+                        color: Colors.grey[400],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 5,vertical: 10),
+                child: Row(
+                  children: [
+                    SizedBox(
+                      width: devicewidth * 0.05,
+                    ),
+                    Icon(
+                      Icons.link,
+                      size: devicewidth * 0.07,
+                      color: Colors.grey[400],
+                    ),
+                    SizedBox(
+                      width: devicewidth * 0.025,
+                    ),
+                    Text(
+                      'Copy Link',
+                      style: TextStyle(
+                        fontSize: devicewidth * 0.055,
+                        color: Colors.grey[400],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 5,vertical: 10),
+                child: Row(
+                  children: [
+                    SizedBox(
+                      width: devicewidth * 0.05,
+                    ),
+                    Icon(
+                      Icons.share,
+                      size: devicewidth * 0.07,
+                      color: Colors.grey[400],
+                    ),
+                    SizedBox(
+                      width: devicewidth * 0.025,
+                    ),
+                    Text(
+                      'Share',
+                      style: TextStyle(
+                        fontSize: devicewidth * 0.055,
+                        color: Colors.grey[400],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              author == me ? GestureDetector(
+                onTap: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (builder)=>PostCreate(caption: widget.post.caption,id: widget.post.id,location: widget.post.location,updating: true,url: widget.post.imageurl,)));
+                },
+                child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 5,vertical: 10),
                   child: Row(
                     children: [
@@ -509,15 +589,15 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
                         width: devicewidth * 0.05,
                       ),
                       Icon(
-                        Icons.report,
+                        Icons.edit,
                         size: devicewidth * 0.07,
-                        color: Colors.redAccent,
+                        color: Colors.black54,
                       ),
                       SizedBox(
                         width: devicewidth * 0.025,
                       ),
                       Text(
-                        'Report',
+                        'Update',
                         style: TextStyle(
                           fontSize: devicewidth * 0.055,
                           color: Colors.black54,
@@ -526,7 +606,17 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
                     ],
                   ),
                 ),
-                Padding(
+              ) : Container(),
+              author == me ? GestureDetector(
+                onTap: () {
+                  delete();
+                  Navigator.pop(context);
+                  const snackBar = SnackBar(
+                  content: Text('Post Deleted 🥲'),
+                  );
+                  ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                },
+                child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 5,vertical: 10),
                   child: Row(
                     children: [
@@ -534,15 +624,15 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
                         width: devicewidth * 0.05,
                       ),
                       Icon(
-                        Icons.link,
+                        Icons.delete_outline_rounded,
                         size: devicewidth * 0.07,
-                        color: Colors.black54,
+                        color: Colors.red,
                       ),
                       SizedBox(
                         width: devicewidth * 0.025,
                       ),
                       Text(
-                        'Copy Link',
+                        'Delete',
                         style: TextStyle(
                           fontSize: devicewidth * 0.055,
                           color: Colors.black54,
@@ -551,98 +641,8 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
                     ],
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 5,vertical: 10),
-                  child: Row(
-                    children: [
-                      SizedBox(
-                        width: devicewidth * 0.05,
-                      ),
-                      Icon(
-                        Icons.share,
-                        size: devicewidth * 0.07,
-                        color: Colors.black54,
-                      ),
-                      SizedBox(
-                        width: devicewidth * 0.025,
-                      ),
-                      Text(
-                        'Share',
-                        style: TextStyle(
-                          fontSize: devicewidth * 0.055,
-                          color: Colors.black54,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                author == me ? GestureDetector(
-                  onTap: () {
-                    Navigator.push(context, MaterialPageRoute(builder: (builder)=>PostCreate(caption: widget.post.caption,id: widget.post.id,location: widget.post.location,updating: true,url: widget.post.imageurl,)));
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 5,vertical: 10),
-                    child: Row(
-                      children: [
-                        SizedBox(
-                          width: devicewidth * 0.05,
-                        ),
-                        Icon(
-                          Icons.edit,
-                          size: devicewidth * 0.07,
-                          color: Colors.black54,
-                        ),
-                        SizedBox(
-                          width: devicewidth * 0.025,
-                        ),
-                        Text(
-                          'Update',
-                          style: TextStyle(
-                            fontSize: devicewidth * 0.055,
-                            color: Colors.black54,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ) : Container(),
-                author == me ? GestureDetector(
-                  onTap: () {
-                    delete();
-                    Navigator.pop(context);
-                    const snackBar = SnackBar(
-                    content: Text('Post Deleted 🥲'),
-                    );
-                    ScaffoldMessenger.of(context).showSnackBar(snackBar);
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 5,vertical: 10),
-                    child: Row(
-                      children: [
-                        SizedBox(
-                          width: devicewidth * 0.05,
-                        ),
-                        Icon(
-                          Icons.delete_outline_rounded,
-                          size: devicewidth * 0.07,
-                          color: Colors.red,
-                        ),
-                        SizedBox(
-                          width: devicewidth * 0.025,
-                        ),
-                        Text(
-                          'Delete',
-                          style: TextStyle(
-                            fontSize: devicewidth * 0.055,
-                            color: Colors.black54,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ) : Container(),
-              ],
-            ),
+              ) : Container(),
+            ],
           ),
         );
       });

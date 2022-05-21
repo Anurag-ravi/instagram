@@ -13,7 +13,7 @@ class CommentModel {
       json['id'] as int, 
       json['author_dp'] as String,
       json['author_username'] as String,
-      json['comment'] as String,
+      json['comment'],
       json['ago'] as String,
       json['likes'] as int,
       json['liked'] as bool,

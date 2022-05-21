@@ -47,7 +47,7 @@ class _PostDetailState extends State<PostDetail> {
       headers: <String, String>{'Authorization': token!},
     );
     if (response.statusCode == 200) {
-      var data = jsonDecode(response.body);
+      var data = jsonDecode(utf8.decode(response.bodyBytes));
       setState(() {
         comments = (data as List).map((e) => CommentModel.fromJson(e)).toList();
       });
@@ -99,7 +99,7 @@ class _PostDetailState extends State<PostDetail> {
         })
     );
     if (response.statusCode == 201) {
-      var data = jsonDecode(response.body);
+      var data = jsonDecode(utf8.decode(response.bodyBytes));
       setState(() {
         comments.insert(0,CommentModel(data['id'], widget.prefs.getString('dp')!, widget.prefs.getString('username')!, commentcontroller.text, '0s', 0, false));
       });
@@ -235,6 +235,8 @@ class _PostDetailState extends State<PostDetail> {
                   return SizedBox(height: 100,);
                 }
                 var com = comments[index - 2];
+                print('==================');
+                print(com.comment);
                 return GestureDetector(
                   onLongPress: () {
                     bottompopup2(context, com.id, com.authorUsername, widget.prefs.getString('username')!,com.comment);
@@ -272,8 +274,9 @@ class _PostDetailState extends State<PostDetail> {
                                 ),
                               ),
                               TextSpan(
-                                text: com.comment,
+                                text: com.comment.toString(),
                                 style: TextStyle(
+                                  fontFamily: 'EmojiOne',
                                   color: secondaryColor(context),
                                 ),
                               ),
@@ -370,7 +373,7 @@ class _PostDetailState extends State<PostDetail> {
     double devicewidth = MediaQuery.of(context).size.width;
     showModalBottomSheet(
         context: context,
-        builder: (BuildContext bc) {
+        builder: (context) {
           return Container(
             decoration: const BoxDecoration(
               color: Colors.white,
@@ -380,101 +383,99 @@ class _PostDetailState extends State<PostDetail> {
               ),
             ),
             height: devicewidth * 0.5,
-            child: Flexible(
-              child: ListView(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 5),
-                    child: Center(
-                      child: Container(
-                        width: devicewidth * 0.15,
-                        height: 4,
-                        decoration: BoxDecoration(
-                            color: Colors.black54,
-                            borderRadius: BorderRadius.circular(2)),
+            child: ListView(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 5),
+                  child: Center(
+                    child: Container(
+                      width: devicewidth * 0.15,
+                      height: 4,
+                      decoration: BoxDecoration(
+                          color: Colors.black54,
+                          borderRadius: BorderRadius.circular(2)),
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 5, vertical: 10),
+                  child: Row(
+                    children: [
+                      SizedBox(
+                        width: devicewidth * 0.05,
                       ),
-                    ),
+                      Icon(
+                        Icons.report,
+                        size: devicewidth * 0.07,
+                        color: Colors.redAccent[100],
+                      ),
+                      SizedBox(
+                        width: devicewidth * 0.025,
+                      ),
+                      Text(
+                        'Report',
+                        style: TextStyle(
+                          fontSize: devicewidth * 0.055,
+                          color: Colors.grey[400],
+                        ),
+                      ),
+                    ],
                   ),
-                  Padding(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 5, vertical: 10),
-                    child: Row(
-                      children: [
-                        SizedBox(
-                          width: devicewidth * 0.05,
+                ),
+                Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 5, vertical: 10),
+                  child: Row(
+                    children: [
+                      SizedBox(
+                        width: devicewidth * 0.05,
+                      ),
+                      Icon(
+                        Icons.link,
+                        size: devicewidth * 0.07,
+                        color: Colors.grey[400],
+                      ),
+                      SizedBox(
+                        width: devicewidth * 0.025,
+                      ),
+                      Text(
+                        'Copy Link',
+                        style: TextStyle(
+                          fontSize: devicewidth * 0.055,
+                          color: Colors.grey[400],
                         ),
-                        Icon(
-                          Icons.report,
-                          size: devicewidth * 0.07,
-                          color: Colors.redAccent,
-                        ),
-                        SizedBox(
-                          width: devicewidth * 0.025,
-                        ),
-                        Text(
-                          'Report',
-                          style: TextStyle(
-                            fontSize: devicewidth * 0.055,
-                            color: Colors.black54,
-                          ),
-                        ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-                  Padding(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 5, vertical: 10),
-                    child: Row(
-                      children: [
-                        SizedBox(
-                          width: devicewidth * 0.05,
+                ),
+                Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 5, vertical: 10),
+                  child: Row(
+                    children: [
+                      SizedBox(
+                        width: devicewidth * 0.05,
+                      ),
+                      Icon(
+                        Icons.share,
+                        size: devicewidth * 0.07,
+                        color: Colors.grey[400],
+                      ),
+                      SizedBox(
+                        width: devicewidth * 0.025,
+                      ),
+                      Text(
+                        'Share',
+                        style: TextStyle(
+                          fontSize: devicewidth * 0.055,
+                          color: Colors.grey[400],
                         ),
-                        Icon(
-                          Icons.link,
-                          size: devicewidth * 0.07,
-                          color: Colors.black54,
-                        ),
-                        SizedBox(
-                          width: devicewidth * 0.025,
-                        ),
-                        Text(
-                          'Copy Link',
-                          style: TextStyle(
-                            fontSize: devicewidth * 0.055,
-                            color: Colors.black54,
-                          ),
-                        ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-                  Padding(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 5, vertical: 10),
-                    child: Row(
-                      children: [
-                        SizedBox(
-                          width: devicewidth * 0.05,
-                        ),
-                        Icon(
-                          Icons.share,
-                          size: devicewidth * 0.07,
-                          color: Colors.black54,
-                        ),
-                        SizedBox(
-                          width: devicewidth * 0.025,
-                        ),
-                        Text(
-                          'Share',
-                          style: TextStyle(
-                            fontSize: devicewidth * 0.055,
-                            color: Colors.black54,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
           );
         });
@@ -484,7 +485,7 @@ class _PostDetailState extends State<PostDetail> {
     double devicewidth = MediaQuery.of(context).size.width;
     showModalBottomSheet(
         context: context,
-        builder: (BuildContext bc) {
+        builder: (context) {
           return Container(
             decoration: const BoxDecoration(
               color: Colors.white,
@@ -494,22 +495,56 @@ class _PostDetailState extends State<PostDetail> {
               ),
             ),
             height: devicewidth * 0.5,
-            child: Flexible(
-              child: ListView(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 5),
-                    child: Center(
-                      child: Container(
-                        width: devicewidth * 0.15,
-                        height: 4,
-                        decoration: BoxDecoration(
-                            color: Colors.black54,
-                            borderRadius: BorderRadius.circular(2)),
-                      ),
+            child: ListView(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 5),
+                  child: Center(
+                    child: Container(
+                      width: devicewidth * 0.15,
+                      height: 4,
+                      decoration: BoxDecoration(
+                          color: Colors.black54,
+                          borderRadius: BorderRadius.circular(2)),
                     ),
                   ),
-                  Padding(
+                ),
+                Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 5, vertical: 10),
+                  child: Row(
+                    children: [
+                      SizedBox(
+                        width: devicewidth * 0.05,
+                      ),
+                      Icon(
+                        Icons.report,
+                        size: devicewidth * 0.07,
+                        color: Colors.redAccent[100],
+                      ),
+                      SizedBox(
+                        width: devicewidth * 0.025,
+                      ),
+                      Text(
+                        'Report',
+                        style: TextStyle(
+                          fontSize: devicewidth * 0.055,
+                          color: Colors.grey[400],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                username == me ? GestureDetector(
+                  onTap: () {
+                    Navigator.pop(context);
+                    setState(() {
+                      updating=true;
+                      updatingid = index;
+                    });
+                    commentcontroller.text  = value;
+                  },
+                  child: Padding(
                     padding:
                         const EdgeInsets.symmetric(horizontal: 5, vertical: 10),
                     child: Row(
@@ -518,15 +553,15 @@ class _PostDetailState extends State<PostDetail> {
                           width: devicewidth * 0.05,
                         ),
                         Icon(
-                          Icons.report,
+                          Icons.edit,
                           size: devicewidth * 0.07,
-                          color: Colors.redAccent,
+                          color: Colors.black54,
                         ),
                         SizedBox(
                           width: devicewidth * 0.025,
                         ),
                         Text(
-                          'Report',
+                          'Update',
                           style: TextStyle(
                             fontSize: devicewidth * 0.055,
                             color: Colors.black54,
@@ -535,76 +570,40 @@ class _PostDetailState extends State<PostDetail> {
                       ],
                     ),
                   ),
-                  username == me ? GestureDetector(
-                    onTap: () {
-                      Navigator.pop(context);
-                      setState(() {
-                        updating=true;
-                        updatingid = index;
-                      });
-                      commentcontroller.text  = value;
-                    },
-                    child: Padding(
-                      padding:
-                          const EdgeInsets.symmetric(horizontal: 5, vertical: 10),
-                      child: Row(
-                        children: [
-                          SizedBox(
-                            width: devicewidth * 0.05,
-                          ),
-                          Icon(
-                            Icons.edit,
-                            size: devicewidth * 0.07,
+                ) : Container(),
+                username == me ?  GestureDetector(
+                  onTap: () {
+                    Navigator.pop(context);
+                    delete(index);
+                  },
+                  child: Padding(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 5, vertical: 10),
+                    child: Row(
+                      children: [
+                        SizedBox(
+                          width: devicewidth * 0.05,
+                        ),
+                        Icon(
+                          Icons.delete_outline_rounded,
+                          size: devicewidth * 0.07,
+                          color: Colors.redAccent,
+                        ),
+                        SizedBox(
+                          width: devicewidth * 0.025,
+                        ),
+                        Text(
+                          'Delete',
+                          style: TextStyle(
+                            fontSize: devicewidth * 0.055,
                             color: Colors.black54,
                           ),
-                          SizedBox(
-                            width: devicewidth * 0.025,
-                          ),
-                          Text(
-                            'Update',
-                            style: TextStyle(
-                              fontSize: devicewidth * 0.055,
-                              color: Colors.black54,
-                            ),
-                          ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
-                  ) : Container(),
-                  username == me ?  GestureDetector(
-                    onTap: () {
-                      Navigator.pop(context);
-                      delete(index);
-                    },
-                    child: Padding(
-                      padding:
-                          const EdgeInsets.symmetric(horizontal: 5, vertical: 10),
-                      child: Row(
-                        children: [
-                          SizedBox(
-                            width: devicewidth * 0.05,
-                          ),
-                          Icon(
-                            Icons.delete_outline_rounded,
-                            size: devicewidth * 0.07,
-                            color: Colors.redAccent,
-                          ),
-                          SizedBox(
-                            width: devicewidth * 0.025,
-                          ),
-                          Text(
-                            'Delete',
-                            style: TextStyle(
-                              fontSize: devicewidth * 0.055,
-                              color: Colors.black54,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ) : Container(),
-                ],
-              ),
+                  ),
+                ) : Container(),
+              ],
             ),
           );
         });

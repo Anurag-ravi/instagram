@@ -34,7 +34,7 @@ class _FeedState extends State<Feed> {
       final response = await http.get(Uri.parse("${url}feed/${pagecount}/"),
           headers: <String, String>{'Authorization': token!},);
       if (response.statusCode == 200) {
-        var data = jsonDecode(response.body);
+        var data = jsonDecode(utf8.decode(response.bodyBytes));
         if(pagecount == 0){
           setState(() {
             posts = (data as List).map((e) => PostModel.fromJson(e)).toList();
@@ -203,7 +203,7 @@ void bottompopup1(context) {
   double devicewidth = MediaQuery.of(context).size.width;
   showModalBottomSheet(
       context: context,
-      builder: (BuildContext bc) {
+      builder: (context) {
         return Container(
           decoration: const BoxDecoration(
             color: Colors.white,
@@ -213,175 +213,173 @@ void bottompopup1(context) {
             ),
           ),
           height: devicewidth,
-          child: Flexible(
-            child: ListView(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 5),
-                  child: Center(
-                    child: Container(
-                      width: devicewidth * 0.15,
-                      height: 4,
-                      decoration: BoxDecoration(
-                          color: Colors.black54,
-                          borderRadius: BorderRadius.circular(2)),
+          child: ListView(
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 5),
+                child: Center(
+                  child: Container(
+                    width: devicewidth * 0.15,
+                    height: 4,
+                    decoration: BoxDecoration(
+                        color: Colors.black54,
+                        borderRadius: BorderRadius.circular(2)),
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 2),
+                child: Center(
+                  child: Text(
+                    'Create',
+                    style: TextStyle(
+                      fontSize: devicewidth * 0.06,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.black54,
                     ),
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 2),
-                  child: Center(
-                    child: Text(
-                      'Create',
+              ),
+              const Divider(
+                height: 5,
+                thickness: 1,
+              ),
+              GestureDetector(
+                onTap: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (builder)=>PostCreate()));
+                },
+                child: Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 5, vertical: 15),
+                  child: Row(
+                    children: [
+                      SizedBox(
+                        width: devicewidth * 0.05,
+                      ),
+                      Icon(
+                        Icons.view_module_outlined,
+                        size: devicewidth * 0.07,
+                        color: Colors.black54,
+                      ),
+                      SizedBox(
+                        width: devicewidth * 0.03,
+                      ),
+                      Text(
+                        'Post',
+                        style: TextStyle(
+                          fontSize: devicewidth * 0.055,
+                          color: Colors.black54,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 5, vertical: 15),
+                child: Row(
+                  children: [
+                    SizedBox(
+                      width: devicewidth * 0.05,
+                    ),
+                    Icon(
+                      Icons.video_collection_outlined,
+                      size: devicewidth * 0.07,
+                      color: Colors.grey[300],
+                    ),
+                    SizedBox(
+                      width: devicewidth * 0.03,
+                    ),
+                    Text(
+                      'Reels',
                       style: TextStyle(
-                        fontSize: devicewidth * 0.06,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.black54,
+                        fontSize: devicewidth * 0.055,
+                        color: Colors.grey[300],
                       ),
                     ),
-                  ),
+                  ],
                 ),
-                const Divider(
-                  height: 5,
-                  thickness: 1,
-                ),
-                GestureDetector(
-                  onTap: () {
-                    Navigator.push(context, MaterialPageRoute(builder: (builder)=>PostCreate()));
-                  },
-                  child: Padding(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 5, vertical: 15),
-                    child: Row(
-                      children: [
-                        SizedBox(
-                          width: devicewidth * 0.05,
-                        ),
-                        Icon(
-                          Icons.view_module_outlined,
-                          size: devicewidth * 0.07,
-                          color: Colors.black54,
-                        ),
-                        SizedBox(
-                          width: devicewidth * 0.03,
-                        ),
-                        Text(
-                          'Post',
-                          style: TextStyle(
-                            fontSize: devicewidth * 0.055,
-                            color: Colors.black54,
-                          ),
-                        ),
-                      ],
+              ),
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 5, vertical: 15),
+                child: Row(
+                  children: [
+                    SizedBox(
+                      width: devicewidth * 0.05,
                     ),
-                  ),
+                    Icon(
+                      Icons.add_circle_outline_rounded,
+                      size: devicewidth * 0.07,
+                      color: Colors.grey[300],
+                    ),
+                    SizedBox(
+                      width: devicewidth * 0.03,
+                    ),
+                    Text(
+                      'Story',
+                      style: TextStyle(
+                        fontSize: devicewidth * 0.055,
+                        color: Colors.grey[300],
+                      ),
+                    ),
+                  ],
                 ),
-                Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 5, vertical: 15),
-                  child: Row(
-                    children: [
-                      SizedBox(
-                        width: devicewidth * 0.05,
+              ),
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 5, vertical: 15),
+                child: Row(
+                  children: [
+                    SizedBox(
+                      width: devicewidth * 0.05,
+                    ),
+                    Icon(
+                      Icons.favorite_outline_rounded,
+                      size: devicewidth * 0.07,
+                      color: Colors.grey[300],
+                    ),
+                    SizedBox(
+                      width: devicewidth * 0.03,
+                    ),
+                    Text(
+                      'Story Highlight',
+                      style: TextStyle(
+                        fontSize: devicewidth * 0.055,
+                        color: Colors.grey[300],
                       ),
-                      Icon(
-                        Icons.video_collection_outlined,
-                        size: devicewidth * 0.07,
-                        color: Colors.black54,
-                      ),
-                      SizedBox(
-                        width: devicewidth * 0.03,
-                      ),
-                      Text(
-                        'Reels',
-                        style: TextStyle(
-                          fontSize: devicewidth * 0.055,
-                          color: Colors.black54,
-                        ),
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-                Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 5, vertical: 15),
-                  child: Row(
-                    children: [
-                      SizedBox(
-                        width: devicewidth * 0.05,
+              ),
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 5, vertical: 15),
+                child: Row(
+                  children: [
+                    SizedBox(
+                      width: devicewidth * 0.05,
+                    ),
+                    Icon(
+                      Icons.wifi_tethering,
+                      size: devicewidth * 0.07,
+                      color: Colors.grey[300],
+                    ),
+                    SizedBox(
+                      width: devicewidth * 0.03,
+                    ),
+                    Text(
+                      'Live',
+                      style: TextStyle(
+                        fontSize: devicewidth * 0.055,
+                        color: Colors.grey[300],
                       ),
-                      Icon(
-                        Icons.add_circle_outline_rounded,
-                        size: devicewidth * 0.07,
-                        color: Colors.black54,
-                      ),
-                      SizedBox(
-                        width: devicewidth * 0.03,
-                      ),
-                      Text(
-                        'Story',
-                        style: TextStyle(
-                          fontSize: devicewidth * 0.055,
-                          color: Colors.black54,
-                        ),
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-                Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 5, vertical: 15),
-                  child: Row(
-                    children: [
-                      SizedBox(
-                        width: devicewidth * 0.05,
-                      ),
-                      Icon(
-                        Icons.favorite_outline_rounded,
-                        size: devicewidth * 0.07,
-                        color: Colors.black54,
-                      ),
-                      SizedBox(
-                        width: devicewidth * 0.03,
-                      ),
-                      Text(
-                        'Story Highlight',
-                        style: TextStyle(
-                          fontSize: devicewidth * 0.055,
-                          color: Colors.black54,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 5, vertical: 15),
-                  child: Row(
-                    children: [
-                      SizedBox(
-                        width: devicewidth * 0.05,
-                      ),
-                      Icon(
-                        Icons.wifi_tethering,
-                        size: devicewidth * 0.07,
-                        color: Colors.black54,
-                      ),
-                      SizedBox(
-                        width: devicewidth * 0.03,
-                      ),
-                      Text(
-                        'Live',
-                        style: TextStyle(
-                          fontSize: devicewidth * 0.055,
-                          color: Colors.black54,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
         );
       });
