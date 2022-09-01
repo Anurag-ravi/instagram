@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:instagram/components/cacheimage.dart';
@@ -202,7 +204,8 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
                   },
                   child: Container(
                     width: deviceWidth,
-                    child: ChachedImage(url: widget.post.imageurl),
+                    child: ChachedImage(url: widget.post.imageurl,bytes: widget.post.bytes,ratio: widget.post.ratio,),
+                    // child: Image.memory(base64Decode(widget.post.bytes)),
                     ),
                 ),
                 Opacity(

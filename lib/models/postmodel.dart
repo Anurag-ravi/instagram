@@ -1,9 +1,13 @@
+import 'dart:ffi';
+
 class PostModel {
   int id;
   String authorDp;
   String authorUsername;
   String location;
   String imageurl;
+  String bytes;
+  double ratio;
   bool liked;
   bool saved;
   String caption;
@@ -13,7 +17,7 @@ class PostModel {
   int likeCount;
   String ago;
 
-  PostModel(this.id, this.authorDp,this.authorUsername,this.location,this.imageurl,this.liked,this.saved,this.caption,this.firstLike,this.firstLikeDp,this.commentCount,this.ago,this.likeCount);
+  PostModel(this.id, this.authorDp,this.authorUsername,this.location,this.imageurl,this.bytes,this.ratio,this.liked,this.saved,this.caption,this.firstLike,this.firstLikeDp,this.commentCount,this.ago,this.likeCount);
 
   factory PostModel.fromJson(dynamic json){
     return PostModel(
@@ -22,6 +26,8 @@ class PostModel {
       json['author_username'] as String,
       json['location'] as String,
       json['image'] as String,
+      json['bytes'] as String,
+      json['ratio'] as double,
       json['liked'] as bool,
       json['saved'] as bool,
       json['caption'] as String,

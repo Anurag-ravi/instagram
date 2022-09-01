@@ -900,219 +900,217 @@ void bottompopup(context) async{
   await showModalBottomSheet<void>(
       context: context,
       builder: (context) {
-        return Flexible(
-          child: Container(
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(30),
-                topRight: Radius.circular(30),
+        return Container(
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(30),
+              topRight: Radius.circular(30),
+            ),
+          ),
+          // height: devicewidth,
+          child: ListView(
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 5),
+                child: Center(
+                  child: Container(
+                    width: devicewidth * 0.15,
+                    height: 4,
+                    decoration: BoxDecoration(
+                        color: Colors.black54,
+                        borderRadius: BorderRadius.circular(2)),
+                  ),
+                ),
               ),
-            ),
-            // height: devicewidth,
-            child: ListView(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 5),
-                  child: Center(
-                    child: Container(
-                      width: devicewidth * 0.15,
-                      height: 4,
-                      decoration: BoxDecoration(
-                          color: Colors.black54,
-                          borderRadius: BorderRadius.circular(2)),
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 5, vertical: 15),
+                child: Row(
+                  children: [
+                    SizedBox(
+                      width: devicewidth * 0.05,
                     ),
-                  ),
+                    Icon(
+                      Icons.settings_rounded,
+                      size: devicewidth * 0.07,
+                      color: Colors.grey[400],
+                    ),
+                    SizedBox(
+                      width: devicewidth * 0.03,
+                    ),
+                    Text(
+                      'Settings',
+                      style: TextStyle(
+                        fontSize: devicewidth * 0.055,
+                        color: Colors.grey[400],
+                      ),
+                    ),
+                  ],
                 ),
-                Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 5, vertical: 15),
+              ),
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 5, vertical: 15),
+                child: Row(
+                  children: [
+                    SizedBox(
+                      width: devicewidth * 0.05,
+                    ),
+                    Icon(
+                      Icons.access_time_rounded,
+                      size: devicewidth * 0.07,
+                      color: Colors.grey[400],
+                    ),
+                    SizedBox(
+                      width: devicewidth * 0.03,
+                    ),
+                    Text(
+                      'Activity',
+                      style: TextStyle(
+                        fontSize: devicewidth * 0.055,
+                        color: Colors.grey[400],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 5, vertical: 15),
+                child: Row(
+                  children: [
+                    SizedBox(
+                      width: devicewidth * 0.05,
+                    ),
+                    Icon(
+                      Icons.qr_code_scanner_rounded,
+                      size: devicewidth * 0.07,
+                      color: Colors.grey[400],
+                    ),
+                    SizedBox(
+                      width: devicewidth * 0.03,
+                    ),
+                    Text(
+                      'QR Code',
+                      style: TextStyle(
+                        fontSize: devicewidth * 0.055,
+                        color: Colors.grey[400],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 5, vertical: 15),
+                child: Row(
+                  children: [
+                    SizedBox(
+                      width: devicewidth * 0.05,
+                    ),
+                    Icon(
+                      Icons.bookmark_border_rounded,
+                      size: devicewidth * 0.07,
+                      color: Colors.grey[400],
+                    ),
+                    SizedBox(
+                      width: devicewidth * 0.03,
+                    ),
+                    Text(
+                      'Saved',
+                      style: TextStyle(
+                        fontSize: devicewidth * 0.055,
+                        color: Colors.grey[400],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 5, vertical: 15),
+                child: Row(
+                  children: [
+                    SizedBox(
+                      width: devicewidth * 0.05,
+                    ),
+                    Icon(
+                      Icons.format_list_bulleted_sharp,
+                      size: devicewidth * 0.07,
+                      color: Colors.grey[400],
+                    ),
+                    SizedBox(
+                      width: devicewidth * 0.03,
+                    ),
+                    Text(
+                      'Close Friends',
+                      style: TextStyle(
+                        fontSize: devicewidth * 0.055,
+                        color: Colors.grey[400],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 5, vertical: 15),
+                child: Row(
+                  children: [
+                    SizedBox(
+                      width: devicewidth * 0.05,
+                    ),
+                    Icon(
+                      Icons.star_border_outlined,
+                      size: devicewidth * 0.07,
+                      color: Colors.grey[400],
+                    ),
+                    SizedBox(
+                      width: devicewidth * 0.03,
+                    ),
+                    Text(
+                      'Favourites',
+                      style: TextStyle(
+                        fontSize: devicewidth * 0.055,
+                        color: Colors.grey[400],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 5, vertical: 15),
+                child: GestureDetector(
+                  onTap: () async {
+                    logout(context);
+                  },
                   child: Row(
                     children: [
                       SizedBox(
                         width: devicewidth * 0.05,
                       ),
                       Icon(
-                        Icons.settings_rounded,
+                        Icons.logout,
                         size: devicewidth * 0.07,
-                        color: Colors.grey[400],
+                        color: Colors.black54,
                       ),
                       SizedBox(
                         width: devicewidth * 0.03,
                       ),
                       Text(
-                        'Settings',
+                        'Logout',
                         style: TextStyle(
                           fontSize: devicewidth * 0.055,
-                          color: Colors.grey[400],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 5, vertical: 15),
-                  child: Row(
-                    children: [
-                      SizedBox(
-                        width: devicewidth * 0.05,
-                      ),
-                      Icon(
-                        Icons.access_time_rounded,
-                        size: devicewidth * 0.07,
-                        color: Colors.grey[400],
-                      ),
-                      SizedBox(
-                        width: devicewidth * 0.03,
-                      ),
-                      Text(
-                        'Activity',
-                        style: TextStyle(
-                          fontSize: devicewidth * 0.055,
-                          color: Colors.grey[400],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 5, vertical: 15),
-                  child: Row(
-                    children: [
-                      SizedBox(
-                        width: devicewidth * 0.05,
-                      ),
-                      Icon(
-                        Icons.qr_code_scanner_rounded,
-                        size: devicewidth * 0.07,
-                        color: Colors.grey[400],
-                      ),
-                      SizedBox(
-                        width: devicewidth * 0.03,
-                      ),
-                      Text(
-                        'QR Code',
-                        style: TextStyle(
-                          fontSize: devicewidth * 0.055,
-                          color: Colors.grey[400],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 5, vertical: 15),
-                  child: Row(
-                    children: [
-                      SizedBox(
-                        width: devicewidth * 0.05,
-                      ),
-                      Icon(
-                        Icons.bookmark_border_rounded,
-                        size: devicewidth * 0.07,
-                        color: Colors.grey[400],
-                      ),
-                      SizedBox(
-                        width: devicewidth * 0.03,
-                      ),
-                      Text(
-                        'Saved',
-                        style: TextStyle(
-                          fontSize: devicewidth * 0.055,
-                          color: Colors.grey[400],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 5, vertical: 15),
-                  child: Row(
-                    children: [
-                      SizedBox(
-                        width: devicewidth * 0.05,
-                      ),
-                      Icon(
-                        Icons.format_list_bulleted_sharp,
-                        size: devicewidth * 0.07,
-                        color: Colors.grey[400],
-                      ),
-                      SizedBox(
-                        width: devicewidth * 0.03,
-                      ),
-                      Text(
-                        'Close Friends',
-                        style: TextStyle(
-                          fontSize: devicewidth * 0.055,
-                          color: Colors.grey[400],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 5, vertical: 15),
-                  child: Row(
-                    children: [
-                      SizedBox(
-                        width: devicewidth * 0.05,
-                      ),
-                      Icon(
-                        Icons.star_border_outlined,
-                        size: devicewidth * 0.07,
-                        color: Colors.grey[400],
-                      ),
-                      SizedBox(
-                        width: devicewidth * 0.03,
-                      ),
-                      Text(
-                        'Favourites',
-                        style: TextStyle(
-                          fontSize: devicewidth * 0.055,
-                          color: Colors.grey[400],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 5, vertical: 15),
-                  child: GestureDetector(
-                    onTap: () async {
-                      logout(context);
-                    },
-                    child: Row(
-                      children: [
-                        SizedBox(
-                          width: devicewidth * 0.05,
-                        ),
-                        Icon(
-                          Icons.logout,
-                          size: devicewidth * 0.07,
                           color: Colors.black54,
                         ),
-                        SizedBox(
-                          width: devicewidth * 0.03,
-                        ),
-                        Text(
-                          'Logout',
-                          style: TextStyle(
-                            fontSize: devicewidth * 0.055,
-                            color: Colors.black54,
-                          ),
-                        ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         );
       });
@@ -1309,217 +1307,215 @@ void bottompopup2(context) {
   showModalBottomSheet(
       context: context,
       builder: (context) {
-        return Flexible(
-          child: Container(
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(30),
-                topRight: Radius.circular(30),
+        return Container(
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(30),
+              topRight: Radius.circular(30),
+            ),
+          ),
+          // height: devicewidth * 1.2,
+          child: ListView(
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 5),
+                child: Center(
+                  child: Container(
+                    width: devicewidth * 0.15,
+                    height: 4,
+                    decoration: BoxDecoration(
+                        color: Colors.black54,
+                        borderRadius: BorderRadius.circular(2)),
+                  ),
+                ),
               ),
-            ),
-            // height: devicewidth * 1.2,
-            child: ListView(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 5),
-                  child: Center(
-                    child: Container(
-                      width: devicewidth * 0.15,
-                      height: 4,
-                      decoration: BoxDecoration(
-                          color: Colors.black54,
-                          borderRadius: BorderRadius.circular(2)),
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 5, vertical: 15),
+                child: Row(
+                  children: [
+                    SizedBox(
+                      width: devicewidth * 0.05,
                     ),
-                  ),
-                ),
-                Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 5, vertical: 15),
-                  child: Row(
-                    children: [
-                      SizedBox(
-                        width: devicewidth * 0.05,
-                      ),
-                      Icon(
-                        Icons.report,
-                        size: devicewidth * 0.07,
-                        color: Colors.grey[400],
-                      ),
-                      SizedBox(
-                        width: devicewidth * 0.03,
-                      ),
-                      Text(
-                        'Report',
-                        style: TextStyle(
-                          fontSize: devicewidth * 0.055,
-                          color: Colors.grey[400],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 5, vertical: 15),
-                  child: Row(
-                    children: [
-                      SizedBox(
-                        width: devicewidth * 0.05,
-                      ),
-                      Icon(
-                        Icons.block,
-                        size: devicewidth * 0.07,
-                        color: Colors.grey[400],
-                      ),
-                      SizedBox(
-                        width: devicewidth * 0.03,
-                      ),
-                      Text(
-                        'Block',
-                        style: TextStyle(
-                          fontSize: devicewidth * 0.055,
-                          color: Colors.grey[400],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 5, vertical: 15),
-                  child: Row(
-                    children: [
-                      SizedBox(
-                        width: devicewidth * 0.05,
-                      ),
-                      Icon(
-                        Icons.no_accounts_rounded,
-                        size: devicewidth * 0.07,
-                        color: Colors.grey[400],
-                      ),
-                      SizedBox(
-                        width: devicewidth * 0.03,
-                      ),
-                      Text(
-                        'Restrict',
-                        style: TextStyle(
-                          fontSize: devicewidth * 0.055,
-                          color: Colors.grey[400],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 5, vertical: 15),
-                  child: Row(
-                    children: [
-                      SizedBox(
-                        width: devicewidth * 0.05,
-                      ),
-                      Icon(
-                        Icons.hide_image_outlined,
-                        size: devicewidth * 0.07,
-                        color: Colors.grey[400],
-                      ),
-                      SizedBox(
-                        width: devicewidth * 0.03,
-                      ),
-                      Text(
-                        'Hide your Story',
-                        style: TextStyle(
-                          fontSize: devicewidth * 0.055,
-                          color: Colors.grey[400],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 5, vertical: 15),
-                  child: Row(
-                    children: [
-                      SizedBox(
-                        width: devicewidth * 0.05,
-                      ),
-                      Icon(
-                        Icons.remove_circle_outline_sharp,
-                        size: devicewidth * 0.07,
-                        color: Colors.grey[400],
-                      ),
-                      SizedBox(
-                        width: devicewidth * 0.03,
-                      ),
-                      Text(
-                        'Remove Follower',
-                        style: TextStyle(
-                          fontSize: devicewidth * 0.055,
-                          color: Colors.grey[400],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 5, vertical: 15),
-                  child: Row(
-                    children: [
-                      SizedBox(
-                        width: devicewidth * 0.05,
-                      ),
-                      Icon(
-                        Icons.link_rounded,
-                        size: devicewidth * 0.07,
-                        color: Colors.grey[400],
-                      ),
-                      SizedBox(
-                        width: devicewidth * 0.03,
-                      ),
-                      Text(
-                        'Copy Profile URL',
-                        style: TextStyle(
-                          fontSize: devicewidth * 0.055,
-                          color: Colors.grey[400],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 5, vertical: 15),
-                  child: GestureDetector(
-                    onTap: () async {},
-                    child: Row(
-                      children: [
-                        SizedBox(
-                          width: devicewidth * 0.05,
-                        ),
-                        Icon(
-                          Icons.share_rounded,
-                          size: devicewidth * 0.07,
-                          color: Colors.grey[400],
-                        ),
-                        SizedBox(
-                          width: devicewidth * 0.03,
-                        ),
-                        Text(
-                          'Share Profile',
-                          style: TextStyle(
-                            fontSize: devicewidth * 0.055,
-                            color: Colors.grey[400],
-                          ),
-                        ),
-                      ],
+                    Icon(
+                      Icons.report,
+                      size: devicewidth * 0.07,
+                      color: Colors.grey[400],
                     ),
+                    SizedBox(
+                      width: devicewidth * 0.03,
+                    ),
+                    Text(
+                      'Report',
+                      style: TextStyle(
+                        fontSize: devicewidth * 0.055,
+                        color: Colors.grey[400],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 5, vertical: 15),
+                child: Row(
+                  children: [
+                    SizedBox(
+                      width: devicewidth * 0.05,
+                    ),
+                    Icon(
+                      Icons.block,
+                      size: devicewidth * 0.07,
+                      color: Colors.grey[400],
+                    ),
+                    SizedBox(
+                      width: devicewidth * 0.03,
+                    ),
+                    Text(
+                      'Block',
+                      style: TextStyle(
+                        fontSize: devicewidth * 0.055,
+                        color: Colors.grey[400],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 5, vertical: 15),
+                child: Row(
+                  children: [
+                    SizedBox(
+                      width: devicewidth * 0.05,
+                    ),
+                    Icon(
+                      Icons.no_accounts_rounded,
+                      size: devicewidth * 0.07,
+                      color: Colors.grey[400],
+                    ),
+                    SizedBox(
+                      width: devicewidth * 0.03,
+                    ),
+                    Text(
+                      'Restrict',
+                      style: TextStyle(
+                        fontSize: devicewidth * 0.055,
+                        color: Colors.grey[400],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 5, vertical: 15),
+                child: Row(
+                  children: [
+                    SizedBox(
+                      width: devicewidth * 0.05,
+                    ),
+                    Icon(
+                      Icons.hide_image_outlined,
+                      size: devicewidth * 0.07,
+                      color: Colors.grey[400],
+                    ),
+                    SizedBox(
+                      width: devicewidth * 0.03,
+                    ),
+                    Text(
+                      'Hide your Story',
+                      style: TextStyle(
+                        fontSize: devicewidth * 0.055,
+                        color: Colors.grey[400],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 5, vertical: 15),
+                child: Row(
+                  children: [
+                    SizedBox(
+                      width: devicewidth * 0.05,
+                    ),
+                    Icon(
+                      Icons.remove_circle_outline_sharp,
+                      size: devicewidth * 0.07,
+                      color: Colors.grey[400],
+                    ),
+                    SizedBox(
+                      width: devicewidth * 0.03,
+                    ),
+                    Text(
+                      'Remove Follower',
+                      style: TextStyle(
+                        fontSize: devicewidth * 0.055,
+                        color: Colors.grey[400],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 5, vertical: 15),
+                child: Row(
+                  children: [
+                    SizedBox(
+                      width: devicewidth * 0.05,
+                    ),
+                    Icon(
+                      Icons.link_rounded,
+                      size: devicewidth * 0.07,
+                      color: Colors.grey[400],
+                    ),
+                    SizedBox(
+                      width: devicewidth * 0.03,
+                    ),
+                    Text(
+                      'Copy Profile URL',
+                      style: TextStyle(
+                        fontSize: devicewidth * 0.055,
+                        color: Colors.grey[400],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 5, vertical: 15),
+                child: GestureDetector(
+                  onTap: () async {},
+                  child: Row(
+                    children: [
+                      SizedBox(
+                        width: devicewidth * 0.05,
+                      ),
+                      Icon(
+                        Icons.share_rounded,
+                        size: devicewidth * 0.07,
+                        color: Colors.grey[400],
+                      ),
+                      SizedBox(
+                        width: devicewidth * 0.03,
+                      ),
+                      Text(
+                        'Share Profile',
+                        style: TextStyle(
+                          fontSize: devicewidth * 0.055,
+                          color: Colors.grey[400],
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         );
       });

@@ -13,7 +13,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 
 
-class PostCreate extends StatefulWidget {
+class  PostCreate extends StatefulWidget {
   const PostCreate({ Key? key,this.updating = false,this.url = '',this.id = 0,this.caption = '',this.location = '' }) : super(key: key);
   final bool updating;
   final String url;
@@ -25,7 +25,7 @@ class PostCreate extends StatefulWidget {
   State<PostCreate> createState() => _PostCreateState();
 }
 
-class _PostCreateState extends State<PostCreate> {
+class _PostCreateState extends State<PostCreate> { 
   final _controller = PageController(initialPage: 1);
   late SharedPreferences prefs;
   TextEditingController captionController = TextEditingController();

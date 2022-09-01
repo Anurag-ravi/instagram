@@ -1,3 +1,3 @@
 // const String url = "https://whatsappclone2808.herokuapp.com/";
-const String url = "http://157.245.108.226/";
-const String media = "http://157.245.108.226";
+const String url = "http://192.168.0.101:8000/";
+const String media = "http://192.168.0.101:8000";
