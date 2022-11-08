@@ -6,6 +6,8 @@ import 'package:instagram/components/postcard.dart';
 import 'package:instagram/components/storycard.dart';
 import 'package:instagram/data.dart';
 import 'package:instagram/models/postmodel.dart';
+import 'package:instagram/models/story_model.dart';
+import 'package:instagram/models/user_model.dart';
 import 'package:instagram/screens/posts/postcreate.dart';
 import 'package:instagram/utilities/constants.dart';
 import 'package:instagram/utilities/logout.dart';
@@ -23,6 +25,8 @@ class Feed extends StatefulWidget {
 
 class _FeedState extends State<Feed> {
   List<PostModel> posts = [];
+  List<StoryModel> stories = [];
+  List<Story> my_story = [];
   int pagecount = 0;
   late ScrollController _scrollController;
 
@@ -56,6 +60,49 @@ class _FeedState extends State<Feed> {
       );
       ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
+  Future<void> fetchstories() async {
+      String? token = widget.prefs.getString('token');
+      final response = await http.get(Uri.parse("${url}stories/all/"),
+          headers: <String, String>{'Authorization': token!},);
+      if (response.statusCode == 200) {
+        var data = jsonDecode(utf8.decode(response.bodyBytes));
+          setState(() {
+            stories = (data as List).map((e) => StoryModel.fromJson(e)).toList();
+          });
+        settoken(response);
+        return;
+      }
+      if (response.statusCode == 401) {
+        logout(context);
+        return;
+      }
+      const snackBar = SnackBar(
+      content: Text('Some Error occured 🥲'),
+      );
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+  }
+  Future<void> fetchmystories() async {
+      String? token = widget.prefs.getString('token');
+      final response = await http.get(Uri.parse("${url}stories/me/"),
+          headers: <String, String>{'Authorization': token!},);
+      if (response.statusCode == 200) {
+        var data = jsonDecode(utf8.decode(response.bodyBytes));
+        print(data);
+          setState(() {
+             my_story = (data as List).map((e) => Story.fromJson(e)).toList();
+          });
+        settoken(response);
+        return;
+      }
+      if (response.statusCode == 401) {
+        logout(context);
+        return;
+      }
+      const snackBar = SnackBar(
+      content: Text('Some Error occured 🥲'),
+      );
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+  }
 
   void _setupScrollController() {
     _scrollController = ScrollController();
@@ -65,7 +112,7 @@ class _FeedState extends State<Feed> {
 
   void _scrollListener() {
     if (_scrollController.offset >=
-        _scrollController.position.maxScrollExtent) {
+        _scrollController.position.maxScrollExtent * 0.8) {
       setState(() {
         pagecount = pagecount + 1;
       });
@@ -79,7 +126,9 @@ class _FeedState extends State<Feed> {
       pagecount = 0;
       posts = [];
     });
-    fetchposts();
+    await fetchposts();
+    await fetchmystories();
+    await fetchstories();
   }
 
   @override
@@ -87,6 +136,8 @@ class _FeedState extends State<Feed> {
     // TODO: implement initState
     _setupScrollController();
     fetchposts();
+    fetchstories();
+    fetchmystories();
     super.initState();
   }
 
@@ -164,9 +215,11 @@ class _FeedState extends State<Feed> {
               child: ListView(
                 scrollDirection: Axis.horizontal,
                 children: List.generate(
-                  10,
+                  stories.length + 1,
                   (int index) {
-                    return const StoryCard();
+                    if(index==0) {
+                      return StoryCard(story: StoryModel(my_story,User("My Story",widget.prefs.getString('dp')!)),);}
+                    return StoryCard(story: stories[index-1],);
                   },
                 ),
               ),

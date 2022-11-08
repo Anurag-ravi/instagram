@@ -1,8 +1,13 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:instagram/components/story-view.dart';
+import 'package:instagram/data.dart';
+import 'package:instagram/models/story_model.dart';
+import 'package:instagram/utilities/demo.dart';
 
 class StoryCard extends StatelessWidget {
-  const StoryCard({Key? key}) : super(key: key);
-
+  const StoryCard({Key? key,required this.story}) : super(key: key);
+  final StoryModel story;
   @override
   Widget build(BuildContext context) {
     double deviceWidth = MediaQuery.of(context).size.width;
@@ -10,42 +15,50 @@ class StoryCard extends StatelessWidget {
       children: [
         Container(
           margin: const EdgeInsets.all(9),
-          child: Stack(
-            alignment: const Alignment(0, 0),
-            children: <Widget>[
-              Container(
-                width: deviceWidth * 0.224,
-                height: deviceWidth * 0.224,
-                decoration: const BoxDecoration(
-                    shape: BoxShape.circle,
-                    gradient: LinearGradient(
-                        begin: Alignment.topRight,
-                        end: Alignment.bottomLeft,
-                        colors: [Colors.purpleAccent, Colors.orange])),
-              ),
-              Container(
-                width: deviceWidth * 0.21,
-                height: deviceWidth * 0.21,
-                child: const CircleAvatar(
-                  backgroundColor: Colors.white,
+          child: GestureDetector(
+            child: Stack(
+              alignment: const Alignment(0, 0),
+              children: <Widget>[
+                Container(
+                  width: deviceWidth * 0.224,
+                  height: deviceWidth * 0.224,
+                  decoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: LinearGradient(
+                          begin: Alignment.topRight,
+                          end: Alignment.bottomLeft,
+                          colors: [Colors.purpleAccent, Colors.orange])),
                 ),
-              ),
-              Container(
-                width: deviceWidth * 0.195,
-                height: deviceWidth * 0.195,
-                child: const CircleAvatar(
-                    backgroundImage: AssetImage('assets/avatar.png')),
-              ),
-              FloatingActionButton(
-                onPressed: () {},
-                backgroundColor: Colors.transparent,
-                elevation: 0,
-              ),
-            ],
+                Container(
+                  width: deviceWidth * 0.21,
+                  height: deviceWidth * 0.21,
+                  child: const CircleAvatar(
+                    backgroundColor: Colors.white,
+                  ),
+                ),
+                Container(
+                  width: deviceWidth * 0.195,
+                  height: deviceWidth * 0.195,
+                  child: CircleAvatar(
+                      backgroundImage:user.profileImageUrl != '' ? CachedNetworkImageProvider( media + story.user.profileImageUrl)
+                        : Image.asset("assets/avatar.png").image,
+                )),
+                FloatingActionButton(
+                  onPressed: () {
+                    if(story.stories.length!=0)
+                    Navigator.push(
+                        context, 
+                        MaterialPageRoute(builder: (builder) => StoryScreen(stories: story.stories,user: story.user,)));
+                  },
+                  backgroundColor: Colors.transparent,
+                  elevation: 0,
+                ),
+              ],
+            ),
           ),
         ),
         Text(
-          'Your Story',
+          story.user.name,
           textAlign: TextAlign.center,
           style: TextStyle(fontSize: deviceWidth * 0.03),
         ),

@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -11,6 +12,7 @@ import 'package:instagram/utilities/logout.dart';
 import 'package:path/path.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 
 class  PostCreate extends StatefulWidget {
@@ -32,6 +34,7 @@ class _PostCreateState extends State<PostCreate> {
   TextEditingController locationController = TextEditingController();
   bool imagepicked = false;
   File _pickedimg = File('');
+  Uint8List webimage = Uint8List(0);
 
   @override
   void initState() {
@@ -61,6 +64,7 @@ class _PostCreateState extends State<PostCreate> {
       "Authorization": token!
       // "Content-type": "multipart/form-data"
     };
+    if(!kIsWeb){
       var stream = http.ByteStream(_pickedimg.openRead());
       stream.cast();
       var length = await _pickedimg.length();
@@ -72,6 +76,15 @@ class _PostCreateState extends State<PostCreate> {
             filename: basename(_pickedimg.path)
           ),
       );
+    } else {
+      request.files.add(
+          http.MultipartFile.fromBytes(
+            'image',
+            webimage,
+            filename: 'post.jpg'
+          ),
+      );
+    }
     request.headers.addAll(headers);
     request.fields.addAll({
       "creator":prefs.getInt('id')!.toString(),
@@ -177,7 +190,7 @@ class _PostCreateState extends State<PostCreate> {
             color: imagepicked ? Colors.white : Colors.grey[300],
             child: AspectRatio(
               aspectRatio: 1/1,
-              child: widget.updating ? ChachedImage(url: widget.url) : imagepicked ? Image.file(_pickedimg) : const Icon(Icons.image_outlined),
+              child: widget.updating ? ChachedImage(url: widget.url) : imagepicked ? kIsWeb ? Image.memory(webimage) : Image.file(_pickedimg) : const Icon(Icons.image_outlined),
               ),
           ),
           SizedBox(
@@ -309,10 +322,19 @@ class _PostCreateState extends State<PostCreate> {
       FocusManager.instance.primaryFocus?.unfocus();
       final _picker = ImagePicker();
       var image = await _picker.pickImage(source: ImageSource.gallery);
-      setState(() {
-        _pickedimg = File(image!.path);
-        imagepicked = true;
-      });
+      if(!kIsWeb){
+        setState(() {
+          _pickedimg = File(image!.path);
+          imagepicked = true;
+        });
+      } else {
+        var f = await image!.readAsBytes();
+        setState(() {
+          _pickedimg = File("a");
+          webimage = f;
+          imagepicked = true;
+        });
+      }
     } catch(e) {
       return;
     }

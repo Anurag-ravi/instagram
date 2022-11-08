@@ -3,6 +3,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:instagram/components/cacheimage.dart';
 import 'package:instagram/data.dart' as data;
@@ -30,6 +31,7 @@ class _EditProfileState extends State<EditProfile> {
   String profileurl = '';
   File _pickedimg = File('');
   bool imgpicked = false;
+  Uint8List webimage = Uint8List(0);
   bool usernamevalid = true;
 
   @override
@@ -78,17 +80,27 @@ class _EditProfileState extends State<EditProfile> {
       // "Content-type": "multipart/form-data"
     };
     if(imgpicked){
-      var stream = http.ByteStream(_pickedimg.openRead());
-      stream.cast();
-      var length = await _pickedimg.length();
-      request.files.add(
-          http.MultipartFile(
+      if(!kIsWeb){
+        var stream = http.ByteStream(_pickedimg.openRead());
+        stream.cast();
+        var length = await _pickedimg.length();
+        request.files.add(
+            http.MultipartFile(
+              'dp',
+                stream,
+                length,
+                filename: basename(_pickedimg.path)
+            ),
+        );
+      } else {
+        request.files.add(
+            http.MultipartFile.fromBytes(
             'dp',
-              stream,
-              length,
-              filename: basename(_pickedimg.path)
+            webimage,
+            filename: 'dp.jpg'
           ),
-      );
+        );
+      }
     }
     request.headers.addAll(headers);
     request.fields.addAll({
@@ -191,7 +203,7 @@ class _EditProfileState extends State<EditProfile> {
                           child: Container(
                             width: deviceWidth * 0.4,
                             height: deviceWidth * 0.4,
-                            child: Image.file(_pickedimg)
+                            child: kIsWeb ? Image.memory(webimage) : Image.file(_pickedimg)
                           ),
                         ) 
                         : ClipOval(
@@ -393,10 +405,19 @@ class _EditProfileState extends State<EditProfile> {
       FocusManager.instance.primaryFocus?.unfocus();
       final _picker = ImagePicker();
       var image = await _picker.pickImage(source: ImageSource.gallery);
-      setState(() {
-        _pickedimg = File(image!.path);
-        imgpicked = true;
-      });
+      if(!kIsWeb){
+        setState(() {
+          _pickedimg = File(image!.path);
+          imgpicked = true;
+        });
+      } else {
+        var f = await image!.readAsBytes();
+        setState(() {
+          _pickedimg = File("a");
+          webimage = f;
+          imgpicked = true;
+        });
+      }
     } catch(e) {
       return;
     }

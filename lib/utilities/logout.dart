@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart';
 import 'package:instagram/pages/login.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
+import 'package:instagram/data.dart' as data;
 
 logout(context) async {
   SharedPreferences prefs =
@@ -25,14 +27,17 @@ settoken(Response response) async {
 
 Future<bool> internetAvailable() async {
   try {
-    final result = await InternetAddress.lookup('google.com');
-    if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
+    final result = await http.get(Uri.parse(data.url));
+    if(result.statusCode==200){
       return true;
     }
-  } on SocketException catch (_) {
+    else{
+        return false;
+    }
+  }
+   on SocketException catch (_) {
     return false;
   }
-  return false;
 }
 
 

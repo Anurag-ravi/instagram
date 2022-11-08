@@ -5,6 +5,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:instagram/components/cacheimage.dart';
 import 'package:instagram/data.dart';
 import 'package:instagram/models/postmodel.dart';
+import 'package:instagram/screens/feed/profile.dart';
 import 'package:instagram/screens/posts/postcreate.dart';
 import 'package:instagram/screens/posts/postdetail.dart';
 import 'package:instagram/utilities/logout.dart';
@@ -130,11 +131,16 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
                 child: Padding(
                   padding: const EdgeInsets.all(5.5),
                   child: ClipOval(
-                    child: Container(
-                      // width: deviceWidth * 0.12,
-                      height: deviceWidth * 0.12,
-                      child: widget.post.authorDp != '' ? ChachedImage(url: widget.post.authorDp)
-                      : Image.asset("assets/avatar.png"),
+                    child: GestureDetector(
+                      onTap: () {
+                        Navigator.push(context, MaterialPageRoute(builder: (builder)=> Profile(me: false,username: widget.post.authorUsername)));
+                      },
+                      child: Container(
+                        // width: deviceWidth * 0.12,
+                        height: deviceWidth * 0.12,
+                        child: widget.post.authorDp != '' ? ChachedImage(url: widget.post.authorDp)
+                        : Image.asset("assets/avatar.png"),
+                      ),
                     ),
                   ),
                 ),

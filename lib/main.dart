@@ -1,12 +1,20 @@
+// import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:instagram/pages/home.dart';
 import 'package:instagram/pages/login.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+// import 'package:window_size/window_size.dart';
 
 late SharedPreferences prefs;
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   prefs = await SharedPreferences.getInstance();
+  // if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
+  //   setWindowTitle("Anurag's Instagram");
+  //   setWindowMaxSize(const Size(350, 720));
+  //   setWindowMinSize(const Size(350, 720));
+  // }
   runApp(const MyApp());
 }
 
