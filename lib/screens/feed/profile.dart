@@ -8,7 +8,6 @@ import 'package:instagram/components/bottomnavbar.dart';
 import 'package:instagram/components/cacheimage.dart';
 import 'package:instagram/components/followCard.dart';
 import 'package:instagram/components/highlightcard.dart';
-import 'package:instagram/data.dart';
 import 'package:instagram/models/profile.dart';
 import 'package:instagram/models/profile_short.dart';
 import 'package:instagram/models/suggestionmodel.dart';
@@ -36,6 +35,7 @@ class _ProfileState extends State<Profile> {
   bool isvisible = false;
   bool loading = true;
   List<SuggestionModel> suggestions = [];
+  late SharedPreferences prefs;
   ProfileModel profile = ProfileModel(
       0, 
       'username', 
@@ -55,6 +55,7 @@ class _ProfileState extends State<Profile> {
   @override
   void initState() {
     // TODO: implement initState
+    init();
     fetch();
     super.initState();
     setState(() {
@@ -62,9 +63,16 @@ class _ProfileState extends State<Profile> {
     });
   }
 
+  init() async {
+    SharedPreferences temp = await SharedPreferences.getInstance();
+    setState(() {
+      prefs = temp;
+    });
+  }
+
   Future<void> fetch() async {
     if (widget.me) {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
+      
       if(prefs.getString('profile') != null){
         Map<String,dynamic> jsondatais = jsonDecode(prefs.getString('profile')!);
         setState(() {
@@ -72,10 +80,11 @@ class _ProfileState extends State<Profile> {
         });
       }
       if (await internetAvailable()){
-        SharedPreferences prefs = await SharedPreferences.getInstance();
+        
         String token = prefs.getString('token').toString();
+        String? url = prefs.getString('url');
         final response = await http.get(
-          Uri.parse("${url}user/profile/"),
+          Uri.parse("${url!}user/profile/"),
           headers: {
             "Authorization": token,
           },
@@ -100,9 +109,10 @@ class _ProfileState extends State<Profile> {
         ScaffoldMessenger.of(context).showSnackBar(snackBar);
       }
     } else {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
+      
       String token = prefs.getString('token') as String;
-      final response = await http.post(Uri.parse("${url}user/profile/"),
+      String? url = prefs.getString('url');
+      final response = await http.post(Uri.parse("${url!}user/profile/"),
           headers: <String, String>{'Authorization': token},
           body: jsonEncode({"username": widget.username}));
       var data = jsonDecode(jsonDecode(utf8.decode(response.bodyBytes)));
@@ -119,9 +129,10 @@ class _ProfileState extends State<Profile> {
   }
 
   Future<void> follow() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
+    
       String? token = prefs.getString('token');
-      final response = await http.post(Uri.parse("${url}user/follow/"),
+      String? url = prefs.getString('url');
+      final response = await http.post(Uri.parse("${url!}user/follow/"),
           headers: <String, String>{'Authorization': token!},
           body: jsonEncode({"username": widget.username}));
       if (response.statusCode == 200) {
@@ -258,7 +269,7 @@ class _ProfileState extends State<Profile> {
                     width: deviceWidth * 0.24,
                     height: deviceWidth * 0.24,
                     child: profile.dp != ''
-                        ? ChachedImage(url: profile.dp)
+                        ? ChachedImage(url: profile.dp,prefs: prefs,)
                         : Image.asset('assets/avatar.png'),
                   ),
                 ),
@@ -583,9 +594,10 @@ class _ProfileState extends State<Profile> {
                 GestureDetector(
                   onTap: () async {
                     if(!isvisible){
-                      SharedPreferences prefs = await SharedPreferences.getInstance();
+                      
                       String token = prefs.getString('token') as String;
-                      final response = await http.get(Uri.parse("${url}user/follow_suggestion/"),
+                      String? url = prefs.getString('url');
+                      final response = await http.get(Uri.parse("${url!}user/follow_suggestion/"),
                           headers: <String, String>{'Authorization': token},
                           );
                       if (response.statusCode == 200) {
@@ -765,6 +777,7 @@ class _ProfileState extends State<Profile> {
                           aspectRatio: 1 / 1,
                           child: ChachedImage(
                             url: profile.posts[index].url,
+                            prefs: prefs,
                           ),
                         ),
                       );
@@ -782,6 +795,7 @@ class _ProfileState extends State<Profile> {
                           aspectRatio: 1 / 1,
                           child: ChachedImage(
                             url: profile.tags[index].url,
+                            prefs:prefs,
                           ),
                         ),
                       );
@@ -808,6 +822,7 @@ class _ProfileState extends State<Profile> {
               child: frnds[0].url != ''
                   ? ChachedImage(
                       url: frnds[0].url,
+                      prefs:prefs
                     )
                   : Image.asset('assets/avatar.png'),
             ),
@@ -825,6 +840,7 @@ class _ProfileState extends State<Profile> {
               child: frnds[0].url != ''
                   ? ChachedImage(
                       url: frnds[0].url,
+                      prefs:prefs
                     )
                   : Image.asset('assets/avatar.png'),
             ),
@@ -838,6 +854,7 @@ class _ProfileState extends State<Profile> {
                 child: frnds[1].url != ''
                     ? ChachedImage(
                         url: frnds[1].url,
+                        prefs:prefs
                       )
                     : Image.asset('assets/avatar.png'),
               ),
@@ -856,6 +873,7 @@ class _ProfileState extends State<Profile> {
               child: frnds[0].url != ''
                   ? ChachedImage(
                       url: frnds[0].url,
+                      prefs:prefs
                     )
                   : Image.asset('assets/avatar.png'),
             ),
@@ -869,6 +887,7 @@ class _ProfileState extends State<Profile> {
                 child: frnds[1].url != ''
                     ? ChachedImage(
                         url: frnds[1].url,
+                        prefs:prefs
                       )
                     : Image.asset('assets/avatar.png'),
               ),
@@ -883,6 +902,7 @@ class _ProfileState extends State<Profile> {
                 child: frnds[2].url != ''
                     ? ChachedImage(
                         url: frnds[2].url,
+                        prefs:prefs
                       )
                     : Image.asset('assets/avatar.png'),
               ),

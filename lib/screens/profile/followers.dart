@@ -4,7 +4,6 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:instagram/components/followlist.dart';
-import 'package:instagram/data.dart';
 import 'package:instagram/models/followmodel.dart';
 import 'package:instagram/models/suggestionmodel.dart';
 import 'package:instagram/utilities/constants.dart';
@@ -34,12 +33,19 @@ class _FollowersState extends State<Followers> with SingleTickerProviderStateMix
 
   @override
   void initState() {
+    init();
     fetchFollowers();
     _tabController = TabController(length: widget.me ? 2 :4, initialIndex: widget.initialIndex, vsync: this)
       ..addListener(() {
         setState(() {});
       });
     super.initState();
+  }
+  init() async {
+    SharedPreferences temp = await SharedPreferences.getInstance();
+    setState(() {
+      prefs = temp;
+    });
   }
 
   Future<void> fetchFollowers() async {
@@ -48,13 +54,14 @@ class _FollowersState extends State<Followers> with SingleTickerProviderStateMix
        prefs = temp;
     });
       String? token = prefs.getString('token');
+      String? url = prefs.getString('url');
       http.Response response;
       if(widget.me){
-        response = await http.get(Uri.parse("${url}user/get_followers/"),
+        response = await http.get(Uri.parse("${url!}user/get_followers/"),
           headers: <String, String>{'Authorization': token!},
           );
       } else {
-        response = await http.post(Uri.parse("${url}user/get_followers/"),
+        response = await http.post(Uri.parse("${url!}user/get_followers/"),
           headers: <String, String>{'Authorization': token!},
           body: jsonEncode({"username": widget.username}));
       }

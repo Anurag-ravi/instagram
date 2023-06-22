@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:instagram/components/cacheimage.dart';
 import 'package:instagram/components/postcard.dart';
-import 'package:instagram/data.dart';
 import 'package:instagram/main.dart';
 import 'package:instagram/models/commentmodel.dart';
 import 'package:instagram/models/postmodel.dart';
@@ -42,8 +41,9 @@ class _PostDetailState extends State<PostDetail> {
 
   Future<void> fetch() async {
     String? token = widget.prefs.getString('token');
+    String? url = widget.prefs.getString('url');
     final response = await http.get(
-      Uri.parse("${url}post/${widget.post.id}/"),
+      Uri.parse("${url!}post/${widget.post.id}/"),
       headers: <String, String>{'Authorization': token!},
     );
     if (response.statusCode == 200) {
@@ -65,8 +65,9 @@ class _PostDetailState extends State<PostDetail> {
   }
   Future<void> like(index) async {
     String? token = widget.prefs.getString('token');
+    String? url = widget.prefs.getString('url');
     final response = await http.get(
-      Uri.parse("${url}comment/like/${index}/"),
+      Uri.parse("${url!}comment/like/${index}/"),
       headers: <String, String>{'Authorization': token!},
     );
     if (response.statusCode == 200) {
@@ -86,8 +87,9 @@ class _PostDetailState extends State<PostDetail> {
   Future<void> comment() async {
     FocusManager.instance.primaryFocus!.unfocus();
     String? token = widget.prefs.getString('token');
+    String? url = widget.prefs.getString('url');
     final response = await http.post(
-      Uri.parse("${url}comment/new/"),
+      Uri.parse("${url!}comment/new/"),
       headers: <String, String>{
         'Authorization': token!,
         "Content-type": "application/json"
@@ -120,8 +122,9 @@ class _PostDetailState extends State<PostDetail> {
   Future<void> update() async {
     FocusManager.instance.primaryFocus!.unfocus();
     String? token = widget.prefs.getString('token');
+    String? url = widget.prefs.getString('url');
     final response = await http.put(
-      Uri.parse("${url}comment/edit/${updatingid}/"),
+      Uri.parse("${url!}comment/edit/${updatingid}/"),
       headers: <String, String>{
         'Authorization': token!,
         "Content-type": "application/json"
@@ -155,8 +158,9 @@ class _PostDetailState extends State<PostDetail> {
   Future<void> delete(index) async {
     FocusManager.instance.primaryFocus!.unfocus();
     String? token = widget.prefs.getString('token');
+    String? url = widget.prefs.getString('url');
     final response = await http.delete(
-      Uri.parse("${url}comment/delete/${index}/"),
+      Uri.parse("${url!}comment/delete/${index}/"),
       headers: <String, String>{'Authorization': token!},
     );
     if (response.statusCode == 204) {
@@ -235,8 +239,6 @@ class _PostDetailState extends State<PostDetail> {
                   return SizedBox(height: 100,);
                 }
                 var com = comments[index - 2];
-                print('==================');
-                print(com.comment);
                 return GestureDetector(
                   onLongPress: () {
                     bottompopup2(context, com.id, com.authorUsername, widget.prefs.getString('username')!,com.comment);
@@ -255,7 +257,7 @@ class _PostDetailState extends State<PostDetail> {
                             width: deviceWidth * 0.12,
                             height: deviceWidth * 0.12,
                             child: com.authorDp != ''
-                                ? ChachedImage(url: com.authorDp)
+                                ? ChachedImage(url: com.authorDp,prefs: prefs,)
                                 : Image.asset('assets/avatar.png')),
                       ),
                       title: RichText(
@@ -328,7 +330,7 @@ class _PostDetailState extends State<PostDetail> {
                       width: deviceWidth * 0.12,
                       height: deviceWidth * 0.12,
                       child: prefs.getString('dp')! != ''
-                          ? ChachedImage(url: prefs.getString('dp')!)
+                          ? ChachedImage(url: prefs.getString('dp')!,prefs: prefs,)
                           : Image.asset('assets/avatar.png')),
                 ),
               ),

@@ -3,7 +3,6 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:instagram/data.dart';
 import 'package:instagram/pages/login.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -208,8 +207,14 @@ class _Forgot_PasswordState extends State<Forgot_Password> {
       _email_valid = isValidEmail(_email);
     });
     if (_email_valid){
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? url = prefs.getString('url');
       final response = await http.post(
-        Uri.parse("${url}user/reset_password/"),
+        Uri.parse("${url!}user/reset_password/"),
+        headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+        },
         body: jsonEncode({
           "email": _email
         })

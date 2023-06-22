@@ -5,7 +5,6 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:instagram/components/cacheimage.dart';
-import 'package:instagram/data.dart' as data;
 import 'package:instagram/screens/feedscreen.dart';
 import 'package:instagram/utilities/constants.dart';
 import 'package:instagram/utilities/logout.dart';
@@ -57,8 +56,9 @@ class _PostCreateState extends State<PostCreate> {
   Future<int> createpost() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
       String? token = prefs.getString('token');
+      String? url = prefs.getString('url');
     var request = http.MultipartRequest(
-        'POST', Uri.parse("${data.url}post/new/"),
+        'POST', Uri.parse("${url!}post/new/"),
     );
     Map<String,String> headers={
       "Authorization": token!
@@ -98,8 +98,9 @@ class _PostCreateState extends State<PostCreate> {
   Future<int> update() async {
     FocusManager.instance.primaryFocus!.unfocus();
     String? token = prefs.getString('token');
+    String? url = prefs.getString('url');
     final response = await http.put(
-      Uri.parse("${data.url}post/edit/${widget.id}/"),
+      Uri.parse("${url!}post/edit/${widget.id}/"),
       headers: <String, String>{
         'Authorization': token!,
         "Content-type": "application/json"
@@ -190,7 +191,7 @@ class _PostCreateState extends State<PostCreate> {
             color: imagepicked ? Colors.white : Colors.grey[300],
             child: AspectRatio(
               aspectRatio: 1/1,
-              child: widget.updating ? ChachedImage(url: widget.url) : imagepicked ? kIsWeb ? Image.memory(webimage) : Image.file(_pickedimg) : const Icon(Icons.image_outlined),
+              child: widget.updating ? ChachedImage(url: widget.url,prefs: prefs,) : imagepicked ? kIsWeb ? Image.memory(webimage) : Image.file(_pickedimg) : const Icon(Icons.image_outlined),
               ),
           ),
           SizedBox(
@@ -336,6 +337,7 @@ class _PostCreateState extends State<PostCreate> {
         });
       }
     } catch(e) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('We are sorry, but you can\'t pick an image in this device.\ntry the same in android app or web')));
       return;
     }
   }

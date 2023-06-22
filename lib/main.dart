@@ -1,9 +1,11 @@
 // import 'dart:io';
 
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:instagram/pages/home.dart';
 import 'package:instagram/pages/login.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
 // import 'package:window_size/window_size.dart';
 
 late SharedPreferences prefs;
@@ -15,7 +17,21 @@ Future<void> main() async {
   //   setWindowMaxSize(const Size(350, 720));
   //   setWindowMinSize(const Size(350, 720));
   // }
+  // Run the HTTP request in the background
+  _performBackgroundTask(prefs);
   runApp(const MyApp());
+}
+
+void _performBackgroundTask(SharedPreferences prefs) async {
+  // Make an HTTP request and process the response
+  final response = await http.get(Uri.parse('https://url-resolver.onrender.com/insta_backend'));
+  if (response.statusCode == 200) {
+    String url = JsonDecoder().convert(response.body)['url'];
+    prefs.setString('url', url+'/');
+    prefs.setString('media', url);
+  } else {
+    print('Failed to fetch data from the server.');
+  }
 }
 
 class MyApp extends StatelessWidget {

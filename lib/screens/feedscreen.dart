@@ -20,22 +20,14 @@ class FeedScreen extends StatefulWidget {
 
 class _FeedScreenState extends State<FeedScreen> {
   int currIndex = 0;
-  late SharedPreferences prefs;
 
   @override
   void initState() {
     // TODO: implement initState
-    init();
     currIndex = widget.tab;
     super.initState();
   }
 
-  init() async {
-    SharedPreferences temp = await SharedPreferences.getInstance();
-    setState(() {
-      prefs = temp;
-    });
-  }
   @override
   Widget build(BuildContext context) {
     double deviceWidth = MediaQuery.of(context).size.width;
@@ -142,7 +134,7 @@ class _FeedScreenState extends State<FeedScreen> {
                       child: Container(
                         width: currIndex == 4 ? deviceWidth*0.075 : deviceWidth*0.15,
                         height: currIndex == 4 ? deviceWidth*0.075 : deviceWidth*0.15,
-                        child: widget.prefs.getString('dp')! == '' ? Image.asset('assets/avatar.png') : ChachedImage(url: widget.prefs.getString('dp')!),
+                        child: widget.prefs.getString('dp')! == '' ? Image.asset('assets/avatar.png') : ChachedImage(url: widget.prefs.getString('dp')!,prefs: widget.prefs,),
                       ),
                     ),
                   ],

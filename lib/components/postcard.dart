@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:instagram/components/cacheimage.dart';
-import 'package:instagram/data.dart';
 import 'package:instagram/models/postmodel.dart';
 import 'package:instagram/screens/feed/profile.dart';
 import 'package:instagram/screens/posts/postcreate.dart';
@@ -52,7 +51,8 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
   Future<void> like() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
       String? token = prefs.getString('token');
-      final response = await http.get(Uri.parse("${url}post/like/${widget.post.id}/"),
+      String? url = prefs.getString('url');
+      final response = await http.get(Uri.parse("${url!}post/like/${widget.post.id}/"),
           headers: <String, String>{'Authorization': token!},
           );
       if (response.statusCode == 200) {
@@ -73,7 +73,8 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
   Future<void> save() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
       String? token = prefs.getString('token');
-      final response = await http.get(Uri.parse("${url}post/save/${widget.post.id}/"),
+      String? url = prefs.getString('url');
+      final response = await http.get(Uri.parse("${url!}post/save/${widget.post.id}/"),
           headers: <String, String>{'Authorization': token!},
           );
       if (response.statusCode == 200) {
@@ -95,8 +96,9 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
    Future<void> delete() async {
     FocusManager.instance.primaryFocus!.unfocus();
     String? token = widget.prefs.getString('token');
+    String? url = widget.prefs.getString('url');
     final response = await http.delete(
-      Uri.parse("${url}post/delete/${widget.post.id}/"),
+      Uri.parse("${url!}post/delete/${widget.post.id}/"),
       headers: <String, String>{'Authorization': token!},
     );
     if (response.statusCode == 204) {
@@ -138,7 +140,7 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
                       child: Container(
                         // width: deviceWidth * 0.12,
                         height: deviceWidth * 0.12,
-                        child: widget.post.authorDp != '' ? ChachedImage(url: widget.post.authorDp)
+                        child: widget.post.authorDp != '' ? ChachedImage(url: widget.post.authorDp,prefs: widget.prefs,)
                         : Image.asset("assets/avatar.png"),
                       ),
                     ),
@@ -210,7 +212,7 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
                   },
                   child: Container(
                     width: deviceWidth,
-                    child: ChachedImage(url: widget.post.imageurl,bytes: widget.post.bytes,ratio: widget.post.ratio,),
+                    child: ChachedImage(url: widget.post.imageurl,bytes: widget.post.bytes,ratio: widget.post.ratio,prefs: widget.prefs,),
                     // child: Image.memory(base64Decode(widget.post.bytes)),
                     ),
                 ),
@@ -319,7 +321,7 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
                 child: Container(
                   width: deviceWidth * 0.06,
                   height: deviceWidth * 0.06,
-                  child: ChachedImage(url: widget.post.firstLikeDp)),
+                  child: ChachedImage(url: widget.post.firstLikeDp,prefs: widget.prefs,)),
               ),
               SizedBox(
                 width: deviceWidth * 0.01,
@@ -395,7 +397,7 @@ class _PostCardState extends State<PostCard> with SingleTickerProviderStateMixin
                         child: Container(
                           width: deviceWidth*0.084,
                           height: deviceWidth*0.084,
-                          child: widget.prefs.getString('dp')! == '' ? Image.asset('assets/avatar.png') : ChachedImage(url: widget.prefs.getString('dp')!),
+                          child: widget.prefs.getString('dp')! == '' ? Image.asset('assets/avatar.png') : ChachedImage(url: widget.prefs.getString('dp')!,prefs: widget.prefs,),
                         ),
                       ),
                 ),

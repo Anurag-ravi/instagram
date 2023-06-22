@@ -4,7 +4,6 @@ import 'package:http/http.dart';
 import 'package:instagram/pages/login.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
-import 'package:instagram/data.dart' as data;
 
 logout(context) async {
   SharedPreferences prefs =
@@ -27,7 +26,9 @@ settoken(Response response) async {
 
 Future<bool> internetAvailable() async {
   try {
-    final result = await http.get(Uri.parse(data.url));
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? url = prefs.getString('url');
+    final result = await http.get(Uri.parse(url!));
     if(result.statusCode==200){
       return true;
     }

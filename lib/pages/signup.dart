@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:instagram/data.dart';
 import 'package:instagram/pages/login.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -332,8 +331,14 @@ class _SignupState extends State<Signup> {
       _pass_valid = isValidPass(_password1);
     });
     if (_email_valid && _pass_valid){
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? url = prefs.getString('url');
       final response = await http.post(
-        Uri.parse("${url}user/register/"),
+        Uri.parse("${url!}user/register/"),
+        headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+        },
         body: jsonEncode({
           "email": _email,
           "password": _password1

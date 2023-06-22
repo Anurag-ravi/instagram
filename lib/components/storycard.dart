@@ -1,13 +1,14 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:instagram/components/story-view.dart';
-import 'package:instagram/data.dart';
 import 'package:instagram/models/story_model.dart';
 import 'package:instagram/utilities/demo.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class StoryCard extends StatelessWidget {
-  const StoryCard({Key? key,required this.story}) : super(key: key);
+  const StoryCard({Key? key,required this.story,required this.prefs}) : super(key: key);
   final StoryModel story;
+  final SharedPreferences prefs;
   @override
   Widget build(BuildContext context) {
     double deviceWidth = MediaQuery.of(context).size.width;
@@ -40,7 +41,7 @@ class StoryCard extends StatelessWidget {
                   width: deviceWidth * 0.195,
                   height: deviceWidth * 0.195,
                   child: CircleAvatar(
-                      backgroundImage:user.profileImageUrl != '' ? CachedNetworkImageProvider( media + story.user.profileImageUrl)
+                      backgroundImage:user.profileImageUrl != '' ? CachedNetworkImageProvider( prefs.getString('media')! + story.user.profileImageUrl)
                         : Image.asset("assets/avatar.png").image,
                 )),
                 FloatingActionButton(
@@ -48,7 +49,7 @@ class StoryCard extends StatelessWidget {
                     if(story.stories.length!=0)
                     Navigator.push(
                         context, 
-                        MaterialPageRoute(builder: (builder) => StoryScreen(stories: story.stories,user: story.user,)));
+                        MaterialPageRoute(builder: (builder) => StoryScreen(stories: story.stories,user: story.user,prefs: prefs,)));
                   },
                   backgroundColor: Colors.transparent,
                   elevation: 0,

@@ -4,7 +4,6 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:instagram/components/profilecard.dart';
-import 'package:instagram/data.dart';
 import 'package:instagram/models/followmodel.dart';
 import 'package:instagram/models/suggestionmodel.dart';
 import 'package:instagram/utilities/constants.dart';
@@ -39,7 +38,8 @@ class _SearchState extends State<Search> with SingleTickerProviderStateMixin {
   getsuggestion() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String token = prefs.getString('token') as String;
-    final response = await http.get(Uri.parse("${url}user/follow_suggestion/"),
+    String? url = prefs.getString('url');
+    final response = await http.get(Uri.parse("${url!}user/follow_suggestion/"),
         headers: <String, String>{'Authorization': token},
         );
     if (response.statusCode == 200) {
@@ -55,7 +55,8 @@ class _SearchState extends State<Search> with SingleTickerProviderStateMixin {
   getsearch() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String token = prefs.getString('token') as String;
-    final response = await http.post(Uri.parse("${url}user/search/"),
+    String? url = prefs.getString('url');
+    final response = await http.post(Uri.parse("${url!}user/search/"),
         headers: <String, String>{'Authorization': token},
         body: jsonEncode({"query": searchController.text})
         );

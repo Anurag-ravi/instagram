@@ -9,7 +9,6 @@ import 'package:instagram/utilities/logout.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 
-import '../data.dart';
 
 class FollowCard extends StatefulWidget {
   const FollowCard({ Key? key,required this.profile }) : super(key: key);
@@ -19,12 +18,12 @@ class FollowCard extends StatefulWidget {
 }
 
 class _FollowCardState extends State<FollowCard> {
+  late SharedPreferences prefs;
 
   Future<void> follow() async {
-      SharedPreferences prefs =
-      await SharedPreferences.getInstance();
       String? token = prefs.getString('token');
-      final response = await http.post(Uri.parse("${url}user/follow/"),
+      String? url = prefs.getString('url');
+      final response = await http.post(Uri.parse("${url!}user/follow/"),
           headers: <String, String>{'Authorization': token!},
           body: jsonEncode({"username": widget.profile.username}));
       if (response.statusCode == 200) {
@@ -38,6 +37,20 @@ class _FollowCardState extends State<FollowCard> {
         logout(context);
         return;
       }
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    init();
+  }
+
+  init() async {
+    SharedPreferences temp = await SharedPreferences.getInstance();
+    setState(() {
+      prefs = temp;
+    });
   }
 
   @override
@@ -68,7 +81,7 @@ class _FollowCardState extends State<FollowCard> {
                   width: deviceWidth * 0.24,
                   height: deviceWidth * 0.24,
                   child: widget.profile.dp != ''
-                      ? ChachedImage(url: widget.profile.dp)
+                      ? ChachedImage(url: widget.profile.dp,prefs: prefs,)
                       : Image.asset('assets/avatar.png'),
                 ),
               ),

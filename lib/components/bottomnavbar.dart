@@ -118,7 +118,7 @@ class _BottomNavTempState extends State<BottomNavTemp> {
                       child: Container(
                         width: deviceWidth*0.075,
                         height: deviceWidth*0.075,
-                        child: ChachedImage(url: prefs.getString('dp')!),
+                        child: ChachedImage(url: prefs.getString('dp')!,prefs: prefs,),
                       ),
                     ),
                   ],

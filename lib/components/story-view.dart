@@ -1,15 +1,17 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:instagram/components/cacheimage.dart';
-import 'package:instagram/data.dart';
+import 'package:instagram/main.dart';
 import 'package:instagram/models/story_model.dart';
 import 'package:instagram/models/user_model.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 
 class StoryScreen extends StatefulWidget {
-  const StoryScreen({ Key? key,required this.stories,required this.user}) : super(key: key);
+  const StoryScreen({ Key? key,required this.stories,required this.user,required this.prefs}) : super(key: key);
   final List<Story> stories;
   final User user;
+  final SharedPreferences prefs;
 
   @override
   State<StoryScreen> createState() => _StoryScreenState();
@@ -83,8 +85,9 @@ class _StoryScreenState extends State<StoryScreen> with SingleTickerProviderStat
                 final Story story = widget.stories[i];
                 switch (story.media) {
                   case MediaType.image:
+                  String? media = widget.prefs.getString("media");
                     return CachedNetworkImage(
-                      imageUrl: media + story.url,
+                      imageUrl: media! + story.url,
                       fit: BoxFit.contain,
                       
                     );

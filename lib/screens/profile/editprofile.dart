@@ -6,7 +6,6 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:instagram/components/cacheimage.dart';
-import 'package:instagram/data.dart' as data;
 import 'package:instagram/models/profile.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:instagram/screens/feedscreen.dart';
@@ -33,9 +32,11 @@ class _EditProfileState extends State<EditProfile> {
   bool imgpicked = false;
   Uint8List webimage = Uint8List(0);
   bool usernamevalid = true;
+  late SharedPreferences prefs;
 
   @override
   void initState() {
+    init();
     // TODO: implement initState
     nameController.text = widget.profile.name;
     usernameController.text = widget.profile.username;
@@ -44,10 +45,18 @@ class _EditProfileState extends State<EditProfile> {
     super.initState();
   }
 
+  init() async {
+    SharedPreferences temp = await SharedPreferences.getInstance();
+    setState(() {
+      prefs = temp;
+    });
+  }
+
   Future<void> checkusername() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
       String? token = prefs.getString('token');
-      final response = await http.post(Uri.parse("${data.url}user/check_username/"),
+      String? url = prefs.getString('url');
+      final response = await http.post(Uri.parse("${url!}user/check_username/"),
           headers: <String, String>{'Authorization': token!},
           body: jsonEncode({"username": usernameController.text}));
       if (response.statusCode == 200) {
@@ -71,8 +80,9 @@ class _EditProfileState extends State<EditProfile> {
   Future<int> editProfile() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
       String? token = prefs.getString('token');
+      String? url = prefs.getString('url');
     var request = http.MultipartRequest(
-        'PUT', Uri.parse("${data.url}user/update_profile/"),
+        'PUT', Uri.parse("${url!}user/update_profile/"),
 
     );
     Map<String,String> headers={
@@ -210,7 +220,7 @@ class _EditProfileState extends State<EditProfile> {
                           child: Container(
                             width: deviceWidth * 0.4,
                             height: deviceWidth * 0.4,
-                            child: profileurl == '' ? Image.asset('assets/avatar.png') : ChachedImage(url: profileurl),
+                            child: profileurl == '' ? Image.asset('assets/avatar.png') : ChachedImage(url: profileurl,prefs:prefs,),
                           ),
                         ),
                         SizedBox(
@@ -419,6 +429,7 @@ class _EditProfileState extends State<EditProfile> {
         });
       }
     } catch(e) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('We are sorry, but you can\'t pick an image in this device.\ntry the same in android app or web')));
       return;
     }
   }

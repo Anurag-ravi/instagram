@@ -3,19 +3,20 @@ import 'dart:convert';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:instagram/data.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ChachedImage extends StatelessWidget {
-  const ChachedImage({ Key? key, required this.url,this.bytes="",this.ratio = 1.0 }) : super(key: key);
+  const ChachedImage({ Key? key, required this.url,this.bytes="",this.ratio = 1.0,required this.prefs }) : super(key: key);
   final String url;
   final String bytes;
   final double ratio;
+  final SharedPreferences prefs;
   @override
   Widget build(BuildContext context) {
     double deviceWidth = MediaQuery.of(context).size.width;
     double h = deviceWidth * ratio;
     Image img = Image.memory(base64Decode(bytes),width: deviceWidth,);
-    print(ratio);
+    String media = prefs.getString('media')!;
     return CachedNetworkImage(
         imageUrl: media + url,
         fit: BoxFit.cover,

@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:instagram/components/postcard.dart';
 import 'package:instagram/components/storycard.dart';
-import 'package:instagram/data.dart';
 import 'package:instagram/models/postmodel.dart';
 import 'package:instagram/models/story_model.dart';
 import 'package:instagram/models/user_model.dart';
@@ -29,13 +28,16 @@ class _FeedState extends State<Feed> {
   List<Story> my_story = [];
   int pagecount = 0;
   late ScrollController _scrollController;
+  bool isFetching = false;
+  double prevPageScroll = 0.0;
 
   
 
 
   Future<void> fetchposts() async {
       String? token = widget.prefs.getString('token');
-      final response = await http.get(Uri.parse("${url}feed/${pagecount}/"),
+      String? url = widget.prefs.getString('url');
+      final response = await http.get(Uri.parse("${url!}feed/${pagecount}/"),
           headers: <String, String>{'Authorization': token!},);
       if (response.statusCode == 200) {
         var data = jsonDecode(utf8.decode(response.bodyBytes));
@@ -62,7 +64,8 @@ class _FeedState extends State<Feed> {
   }
   Future<void> fetchstories() async {
       String? token = widget.prefs.getString('token');
-      final response = await http.get(Uri.parse("${url}stories/all/"),
+      String? url = widget.prefs.getString('url');
+      final response = await http.get(Uri.parse("${url!}stories/all/"),
           headers: <String, String>{'Authorization': token!},);
       if (response.statusCode == 200) {
         var data = jsonDecode(utf8.decode(response.bodyBytes));
@@ -83,17 +86,17 @@ class _FeedState extends State<Feed> {
   }
   Future<void> fetchmystories() async {
       String? token = widget.prefs.getString('token');
-      final response = await http.get(Uri.parse("${url}stories/me/"),
+      String? url = widget.prefs.getString('url');
+      final response = await http.get(Uri.parse("${url!}stories/me/"),
           headers: <String, String>{'Authorization': token!},);
       if (response.statusCode == 200) {
         var data = jsonDecode(utf8.decode(response.bodyBytes));
-        print(data);
           setState(() {
              my_story = (data as List).map((e) => Story.fromJson(e)).toList();
           });
         settoken(response);
         return;
-      }
+      } 
       if (response.statusCode == 401) {
         logout(context);
         return;
@@ -111,14 +114,24 @@ class _FeedState extends State<Feed> {
   }
 
   void _scrollListener() {
-    if (_scrollController.offset >=
-        _scrollController.position.maxScrollExtent * 0.8) {
+    if (!isFetching &&
+      _scrollController.offset >= (_scrollController.position.maxScrollExtent - prevPageScroll) * 0.8 + prevPageScroll &&
+      _scrollController.position.maxScrollExtent > 0) {
+    setState(() {
+      pagecount = pagecount + 1;
+      prevPageScroll = _scrollController.position.maxScrollExtent;
+    });
+    
+    setState(() {
+      isFetching = true;
+    });
+    
+    fetchposts().then((_) {
       setState(() {
-        pagecount = pagecount + 1;
+        isFetching = false;
       });
-
-      fetchposts();
-    }
+    });
+  }
   }
 
   Future<void> refresh() async {
@@ -218,8 +231,8 @@ class _FeedState extends State<Feed> {
                   stories.length + 1,
                   (int index) {
                     if(index==0) {
-                      return StoryCard(story: StoryModel(my_story,User("My Story",widget.prefs.getString('dp')!)),);}
-                    return StoryCard(story: stories[index-1],);
+                      return StoryCard(story: StoryModel(my_story,User("My Story",widget.prefs.getString('dp')!)),prefs: widget.prefs,);}
+                    return StoryCard(story: stories[index-1],prefs: widget.prefs,);
                   },
                 ),
               ),

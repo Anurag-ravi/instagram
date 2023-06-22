@@ -5,7 +5,6 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:instagram/components/cacheimage.dart';
-import 'package:instagram/data.dart';
 import 'package:instagram/models/followmodel.dart';
 import 'package:instagram/models/suggestionmodel.dart';
 import 'package:instagram/screens/feed/profile.dart';
@@ -30,14 +29,22 @@ class _ProfileCardState extends State<ProfileCard> {
   void initState() {
     // TODO: implement initState
     super.initState();
+    init();
   }
   
+  init() async {
+    SharedPreferences temp = await SharedPreferences.getInstance();
+    setState(() {
+      prefs = temp;
+    });
+  }
 
   Future<void> follow() async {
       SharedPreferences prefs =
       await SharedPreferences.getInstance();
       String? token = prefs.getString('token');
-      final response = await http.post(Uri.parse("${url}user/follow/"),
+      String? url = prefs.getString('url');
+      final response = await http.post(Uri.parse("${url!}user/follow/"),
           headers: <String, String>{'Authorization': token!},
           body: jsonEncode({"username": widget.issuggestion ? widget.profile2.username :widget.profile.username}));
       if (response.statusCode == 200) {
@@ -66,10 +73,10 @@ class _ProfileCardState extends State<ProfileCard> {
             width: deviceWidth * 0.14,
             height: deviceWidth * 0.14,
             child: widget.issuggestion ? widget.profile2.dp != ''
-                ? ChachedImage(url: widget.profile2.dp)
+                ? ChachedImage(url: widget.profile2.dp,prefs: prefs,)
                 : Image.asset('assets/avatar.png')
                 : widget.profile.dp != ''
-                ? ChachedImage(url: widget.profile.dp)
+                ? ChachedImage(url: widget.profile.dp,prefs: prefs,)
                 : Image.asset('assets/avatar.png'),
           ),
         ),

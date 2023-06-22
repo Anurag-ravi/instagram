@@ -3,7 +3,6 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:instagram/data.dart';
 import 'package:instagram/pages/forgot_pass.dart';
 import 'package:instagram/pages/home.dart';
 import 'package:instagram/pages/signup.dart';
@@ -275,14 +274,21 @@ class _LoginState extends State<Login> {
       _pass_valid = isValidPass(_password);
     });
     if (_email_valid && _pass_valid){
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? url = prefs.getString('url');
       final response = await http.post(
-        Uri.parse("${url}user/login/"),
+        Uri.parse("${url!}user/login/"),
+        headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+        },
         body: jsonEncode({
           "email": _email,
           "password": _password
         })
       );
       var data = jsonDecode(response.body);
+      print(data);
       if(response.statusCode == 200){
         widget.prefs.setString('token', data['jwt']);
         widget.prefs.setString('username', data['username']);
