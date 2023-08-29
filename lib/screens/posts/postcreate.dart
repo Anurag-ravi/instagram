@@ -34,6 +34,7 @@ class _PostCreateState extends State<PostCreate> {
   bool imagepicked = false;
   File _pickedimg = File('');
   Uint8List webimage = Uint8List(0);
+  bool uploading = false;
 
   @override
   void initState() {
@@ -54,6 +55,10 @@ class _PostCreateState extends State<PostCreate> {
   }
 
   Future<int> createpost() async {
+    FocusManager.instance.primaryFocus!.unfocus();
+    setState(() {
+      uploading = true;
+    });
     SharedPreferences prefs = await SharedPreferences.getInstance();
       String? token = prefs.getString('token');
       String? url = prefs.getString('url');
@@ -92,6 +97,9 @@ class _PostCreateState extends State<PostCreate> {
       "location":locationController.text
     });
     var res = await request.send();
+    setState(() {
+      uploading = false;
+    });
     return res.statusCode;
   }
 
@@ -125,197 +133,202 @@ class _PostCreateState extends State<PostCreate> {
   @override
   Widget build(BuildContext context) {
     double deviceWidth = MediaQuery.of(context).size.width;
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: const Color(0xfff8faf8),
-          elevation: 0.5,
-          centerTitle: false,
-          title: Text(
-            widget.updating ? 'Update Post' : 'Create Post',
-            style: TextStyle(color: secondaryColor(context)),
-          ),
-          leading: IconButton(
-            onPressed: () {
-              Navigator.pop(context);
-            },
-            icon: Icon(
-              Icons.arrow_back,
-              color: secondaryColor(context),
-            ),
-          ),
-          actions: [
-            IconButton(
-              onPressed: () async{
-                if(widget.updating){
-                  int code = await update();
-                  code == 201 ? Navigator.push(context, MaterialPageRoute(builder: (builder)=>FeedScreen(controller: _controller, prefs: prefs,tab: 0,))) : null;
-                  const snackBar = SnackBar(
-                    content: Text('Post Updated 😊'),
-                    );
-                    ScaffoldMessenger.of(context).showSnackBar(snackBar);
-                }
-                if(imagepicked && !widget.updating){
-                  int code = await createpost();
-                  if(code == 201){
-                    Navigator.push(context, MaterialPageRoute(builder: (builder)=>FeedScreen(controller: _controller, prefs: prefs,tab: 0,)));
+    return Stack(
+      children: [
+        Scaffold(
+          appBar: AppBar(
+            backgroundColor: const Color(0xfff8faf8),
+              elevation: 0.5,
+              centerTitle: false,
+              title: Text(
+                widget.updating ? 'Update Post' : 'Create Post',
+                style: TextStyle(color: secondaryColor(context)),
+              ),
+              leading: IconButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                icon: Icon(
+                  Icons.arrow_back,
+                  color: secondaryColor(context),
+                ),
+              ),
+              actions: [
+                IconButton(
+                  onPressed: () async{
+                    if(widget.updating){
+                      int code = await update();
+                      code == 201 ? Navigator.push(context, MaterialPageRoute(builder: (builder)=>FeedScreen(controller: _controller, prefs: prefs,tab: 0,))) : null;
+                      const snackBar = SnackBar(
+                        content: Text('Post Updated 😊'),
+                        );
+                        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                    }
+                    if(imagepicked && !widget.updating){
+                      int code = await createpost();
+                      if(code == 201){
+                        Navigator.push(context, MaterialPageRoute(builder: (builder)=>FeedScreen(controller: _controller, prefs: prefs,tab: 0,)));
+                        const snackBar = SnackBar(
+                        content: Text('Post Created 😍'),
+                        );
+                        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                      }
+                      const snackBar = SnackBar(
+                      content: Text('Some error occured 🥲'),
+                      );
+                      code != 201 ? ScaffoldMessenger.of(context).showSnackBar(snackBar) : null;
+                    }
                     const snackBar = SnackBar(
-                    content: Text('Post Created 😍'),
-                    );
-                    ScaffoldMessenger.of(context).showSnackBar(snackBar);
-                  }
-                  const snackBar = SnackBar(
-                  content: Text('Some error occured 🥲'),
-                  );
-                  code != 201 ? ScaffoldMessenger.of(context).showSnackBar(snackBar) : null;
-                }
-                const snackBar = SnackBar(
-                  content: Text('Please pich one image'),
-                  );
-                  !widget.updating && !imagepicked ? ScaffoldMessenger.of(context).showSnackBar(snackBar) : null;
-              },
-              icon: const Icon(
-                Icons.check,
-                color: Colors.blue,
-              ),
-            ),
-          ],
-      ),
-      body: ListView(
-        children: [
-          SizedBox(
-            height: deviceWidth * .01,
-          ),
-          Container(
-            width: deviceWidth,
-            height: deviceWidth,
-            color: imagepicked ? Colors.white : Colors.grey[300],
-            child: AspectRatio(
-              aspectRatio: 1/1,
-              child: widget.updating ? ChachedImage(url: widget.url,prefs: prefs,) : imagepicked ? kIsWeb ? Image.memory(webimage) : Image.file(_pickedimg) : const Icon(Icons.image_outlined),
-              ),
-          ),
-          SizedBox(
-            height: deviceWidth * .03,
-          ),
-          !widget.updating ? GestureDetector(
-            onTap: () => pickImage(context),
-            child: Center(
-              child: Text('Change Photo',
-                style: TextStyle(
-                  color: Colors.blue,
-                  fontSize: deviceWidth *.05,
-                  fontWeight: FontWeight.w500,
-                  letterSpacing: 0.2,
+                      content: Text('Please pich one image'),
+                      );
+                      !widget.updating && !imagepicked ? ScaffoldMessenger.of(context).showSnackBar(snackBar) : null;
+                  },
+                  icon: const Icon(
+                    Icons.check,
+                    color: Colors.blue,
+                  ),
                 ),
-              ),
-            ),
-          ) : Container(),
-          SizedBox(
-            height: deviceWidth*.05,
+              ],
           ),
-          Row(
+          body: ListView(
             children: [
               SizedBox(
-                width: deviceWidth*.05,
-              ),
-              Text('Caption',
-                style: TextStyle(
-                  color: Colors.grey,
-                  fontSize: deviceWidth *.045,
-                  fontWeight: FontWeight.w400,
-                  letterSpacing: 0.2,
-                ),
-              ),
-            ],
-          ),
-          SizedBox(
-            height: deviceWidth*.015,
-          ),
-          Row(
-            children: [
-              SizedBox(
-                width: deviceWidth*.05,
+                height: deviceWidth * .01,
               ),
               Container(
-                width: deviceWidth * .90,
-                height: deviceWidth * .1,
-                decoration: const BoxDecoration(
-                  border: Border(
-                    bottom: BorderSide(
-                      color: Colors.black54,
-                    ),
+                width: deviceWidth,
+                height: deviceWidth,
+                color: imagepicked ? Colors.white : Colors.grey[300],
+                child: AspectRatio(
+                  aspectRatio: 1/1,
+                  child: widget.updating ? ChachedImage(url: widget.url,prefs: prefs,) : imagepicked ? kIsWeb ? Image.memory(webimage) : Image.file(_pickedimg) : const Icon(Icons.image_outlined),
                   ),
-                ),
-                child: Center(
-                    child: TextFormField(
-                      cursorColor: Colors.grey,
-                      controller: captionController,
-                      style: TextStyle(
-                        fontSize: deviceWidth * .045,
-                        fontWeight: FontWeight.w500,
-                      ),
-                      decoration: const InputDecoration.collapsed(
-                        hintText: 'Write a Caption...',
-                      ),
-                    ),
-                  ),
-                ),
-            ],
-          ),
-          SizedBox(
-            height: deviceWidth*.05,
-          ),
-          Row(
-            children: [
+              ),
               SizedBox(
-                width: deviceWidth*.05,
+                height: deviceWidth * .03,
               ),
-              Text('Location',
-                style: TextStyle(
-                  color: Colors.grey,
-                  fontSize: deviceWidth *.045,
-                  fontWeight: FontWeight.w400,
-                  letterSpacing: 0.2,
-                ),
-              ),
-            ],
-          ),
-          SizedBox(
-            height: deviceWidth*.015,
-          ),
-          Row(
-            children: [
-              SizedBox(
-                width: deviceWidth*.05,
-              ),
-              Container(
-                width: deviceWidth * .90,
-                height: deviceWidth * .1,
-                decoration: const BoxDecoration(
-                  border: Border(
-                    bottom: BorderSide(
-                      color: Colors.black54,
-                    ),
-                  ),
-                ),
+              !widget.updating ? GestureDetector(
+                onTap: () => pickImage(context),
                 child: Center(
-                    child: TextFormField(
-                      cursorColor: Colors.grey,
-                      controller: locationController,
-                      style: TextStyle(
-                        fontSize: deviceWidth * .045,
-                        fontWeight: FontWeight.w500,
-                      ),
-                      decoration: const InputDecoration.collapsed(
-                        hintText: 'Add a Location....',
-                      ),
+                  child: Text('Change Photo',
+                    style: TextStyle(
+                      color: Colors.blue,
+                      fontSize: deviceWidth *.05,
+                      fontWeight: FontWeight.w500,
+                      letterSpacing: 0.2,
                     ),
                   ),
                 ),
+              ) : Container(),
+              SizedBox(
+                height: deviceWidth*.05,
+              ),
+              Row(
+                children: [
+                  SizedBox(
+                    width: deviceWidth*.05,
+                  ),
+                  Text('Caption',
+                    style: TextStyle(
+                      color: Colors.grey,
+                      fontSize: deviceWidth *.045,
+                      fontWeight: FontWeight.w400,
+                      letterSpacing: 0.2,
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(
+                height: deviceWidth*.015,
+              ),
+              Row(
+                children: [
+                  SizedBox(
+                    width: deviceWidth*.05,
+                  ),
+                  Container(
+                    width: deviceWidth * .90,
+                    height: deviceWidth * .1,
+                    decoration: const BoxDecoration(
+                      border: Border(
+                        bottom: BorderSide(
+                          color: Colors.black54,
+                        ),
+                      ),
+                    ),
+                    child: Center(
+                        child: TextFormField(
+                          cursorColor: Colors.grey,
+                          controller: captionController,
+                          style: TextStyle(
+                            fontSize: deviceWidth * .045,
+                            fontWeight: FontWeight.w500,
+                          ),
+                          decoration: const InputDecoration.collapsed(
+                            hintText: 'Write a Caption...',
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+              SizedBox(
+                height: deviceWidth*.05,
+              ),
+              Row(
+                children: [
+                  SizedBox(
+                    width: deviceWidth*.05,
+                  ),
+                  Text('Location',
+                    style: TextStyle(
+                      color: Colors.grey,
+                      fontSize: deviceWidth *.045,
+                      fontWeight: FontWeight.w400,
+                      letterSpacing: 0.2,
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(
+                height: deviceWidth*.015,
+              ),
+              Row(
+                children: [
+                  SizedBox(
+                    width: deviceWidth*.05,
+                  ),
+                  Container(
+                    width: deviceWidth * .90,
+                    height: deviceWidth * .1,
+                    decoration: const BoxDecoration(
+                      border: Border(
+                        bottom: BorderSide(
+                          color: Colors.black54,
+                        ),
+                      ),
+                    ),
+                    child: Center(
+                        child: TextFormField(
+                          cursorColor: Colors.grey,
+                          controller: locationController,
+                          style: TextStyle(
+                            fontSize: deviceWidth * .045,
+                            fontWeight: FontWeight.w500,
+                          ),
+                          decoration: const InputDecoration.collapsed(
+                            hintText: 'Add a Location....',
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
             ],
           ),
-        ],
-      ),
+        ),
+        uploading ? Scaffold(backgroundColor: Colors.black.withOpacity(0.5),body: Center(child: CircularProgressIndicator(),),) : Container()
+      ],
     );
   }
   pickImage(context) async {

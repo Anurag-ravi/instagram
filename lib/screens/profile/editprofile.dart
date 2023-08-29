@@ -33,6 +33,7 @@ class _EditProfileState extends State<EditProfile> {
   Uint8List webimage = Uint8List(0);
   bool usernamevalid = true;
   late SharedPreferences prefs;
+  bool loading = false;
 
   @override
   void initState() {
@@ -78,6 +79,10 @@ class _EditProfileState extends State<EditProfile> {
   }
 
   Future<int> editProfile() async {
+    FocusManager.instance.primaryFocus?.unfocus();
+    setState(() {
+      loading = true;
+    });
     SharedPreferences prefs = await SharedPreferences.getInstance();
       String? token = prefs.getString('token');
       String? url = prefs.getString('url');
@@ -119,6 +124,9 @@ class _EditProfileState extends State<EditProfile> {
       "bio":bioController.text
     });
     var res = await request.send();
+    setState(() {
+      loading = false;
+    });
     return res.statusCode;
   }
 
@@ -126,287 +134,299 @@ class _EditProfileState extends State<EditProfile> {
   @override
   Widget build(BuildContext context) {
     double deviceWidth = MediaQuery.of(context).size.width;
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: new Color(0xfff8faf8),
-        elevation: 0.0,
-        centerTitle: true,
-        leading: IconButton(
-          onPressed: () {
-            Navigator.pop(context);
-          },
-          alignment: Alignment.centerLeft,
-          icon: Icon(
-            Icons.clear_outlined,
-            color: Colors.black,
-            size: deviceWidth * 0.08,
-          ),
-        ),
-        title: SizedBox(
-          height: deviceWidth * 0.12,
-          child: Column(
-            children: [
-              SizedBox(height: deviceWidth * .02,),
-              Row(
-                children: const [
-                  Text(
-                    'Edit Profile',
-                    style: TextStyle(
-                      color: Colors.black,
-                      fontWeight: FontWeight.w700,
-                      fontFamily: 'arial',
-                    ),
+    return Stack(
+      children: [
+        Scaffold(
+          appBar: AppBar(
+            backgroundColor: new Color(0xfff8faf8),
+            elevation: 0.0,
+            centerTitle: true,
+            leading: IconButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              alignment: Alignment.centerLeft,
+              icon: Icon(
+                Icons.clear_outlined,
+                color: Colors.black,
+                size: deviceWidth * 0.08,
+              ),
+            ),
+            title: SizedBox(
+              height: deviceWidth * 0.12,
+              child: Column(
+                children: [
+                  SizedBox(height: deviceWidth * .02,),
+                  Row(
+                    children: const [
+                      Text(
+                        'Edit Profile',
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontWeight: FontWeight.w700,
+                          fontFamily: 'arial',
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
+            ),
+            actions: <Widget>[
+              IconButton(
+                onPressed: () async {
+                  if(usernamevalid){
+                    int code = await editProfile();
+                    if (code == 200){
+                      PageController controller = PageController(initialPage: 1);
+                      SharedPreferences prefs = await SharedPreferences.getInstance();
+                      Navigator.push(context, MaterialPageRoute(builder: (builder)=>FeedScreen(controller: controller, prefs: prefs,tab: 4,)));
+                    }
+                    if (code == 400){
+                      const snackBar = SnackBar(
+                      content: Text('Try Again....'),
+                      );
+                      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                    }
+                  } else {
+                    const snackBar = SnackBar(
+                      content: Text('Try with valid username'),
+                      );
+                      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                  }
+                },
+                alignment: Alignment.center,
+                icon: Icon(
+                  Icons.check,
+                  color: Colors.blue,
+                  size: deviceWidth * 0.09,
+                ),
+              ),
             ],
           ),
-        ),
-        actions: <Widget>[
-          IconButton(
-            onPressed: () async {
-              if(usernamevalid){
-                int code = await editProfile();
-                if (code == 200){
-                  PageController controller = PageController(initialPage: 1);
-                  SharedPreferences prefs = await SharedPreferences.getInstance();
-                  Navigator.push(context, MaterialPageRoute(builder: (builder)=>FeedScreen(controller: controller, prefs: prefs,tab: 4,)));
-                }
-                if (code == 400){
-                  const snackBar = SnackBar(
-                  content: Text('Try Again....'),
-                  );
-                  ScaffoldMessenger.of(context).showSnackBar(snackBar);
-                }
-              } else {
-                const snackBar = SnackBar(
-                  content: Text('Try with valid username'),
-                  );
-                  ScaffoldMessenger.of(context).showSnackBar(snackBar);
-              }
-            },
-            alignment: Alignment.center,
-            icon: Icon(
-              Icons.check,
-              color: Colors.blue,
-              size: deviceWidth * 0.09,
-            ),
-          ),
-        ],
-      ),
-      body: SafeArea(
-        child: CustomScrollView(
-          slivers: <Widget>[
-            SliverList(
-              delegate: SliverChildListDelegate(<Widget>[
-                SizedBox(
-                  height: deviceWidth * .01,
-                ),
-                Row(
-                  children: [
+          body: SafeArea(
+            child: CustomScrollView(
+              slivers: <Widget>[
+                SliverList(
+                  delegate: SliverChildListDelegate(<Widget>[
                     SizedBox(
-                      width: deviceWidth * 0.30,
+                      height: deviceWidth * .01,
                     ),
-                    Column(
+                    Row(
                       children: [
-                        imgpicked ? ClipOval(
-                          child: Container(
-                            width: deviceWidth * 0.4,
-                            height: deviceWidth * 0.4,
-                            child: kIsWeb ? Image.memory(webimage) : Image.file(_pickedimg)
-                          ),
-                        ) 
-                        : ClipOval(
-                          child: Container(
-                            width: deviceWidth * 0.4,
-                            height: deviceWidth * 0.4,
-                            child: profileurl == '' ? Image.asset('assets/avatar.png') : ChachedImage(url: profileurl,prefs:prefs,),
-                          ),
-                        ),
                         SizedBox(
-                          height: deviceWidth*.03,
+                          width: deviceWidth * 0.30,
                         ),
-                        GestureDetector(
-                          onTap: () => pickImage(context),
-                          child: Text('Change Photo',
-                            style: TextStyle(
-                              color: Colors.blue,
-                              fontSize: deviceWidth *.055,
-                              fontWeight: FontWeight.w500,
-                              letterSpacing: 0.2,
+                        Column(
+                          children: [
+                            imgpicked ? ClipOval(
+                              child: Container(
+                                width: deviceWidth * 0.4,
+                                height: deviceWidth * 0.4,
+                                child: kIsWeb ? Image.memory(webimage) : Image.file(_pickedimg)
+                              ),
+                            ) 
+                            : ClipOval(
+                              child: Container(
+                                width: deviceWidth * 0.4,
+                                height: deviceWidth * 0.4,
+                                child: profileurl == '' ? Image.asset('assets/avatar.png') : ChachedImage(url: profileurl,prefs:prefs,),
+                              ),
+                            ),
+                            SizedBox(
+                              height: deviceWidth*.03,
+                            ),
+                            GestureDetector(
+                              onTap: () => pickImage(context),
+                              child: Text('Change Photo',
+                                style: TextStyle(
+                                  color: Colors.blue,
+                                  fontSize: deviceWidth *.055,
+                                  fontWeight: FontWeight.w500,
+                                  letterSpacing: 0.2,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                    SizedBox(
+                      height: deviceWidth*.05,
+                    ),
+                    Row(
+                      children: [
+                        SizedBox(
+                          width: deviceWidth*.05,
+                        ),
+                        Text('Name',
+                          style: TextStyle(
+                            color: Colors.grey,
+                            fontSize: deviceWidth *.045,
+                            fontWeight: FontWeight.w400,
+                            letterSpacing: 0.2,
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(
+                      height: deviceWidth*.015,
+                    ),
+                    Row(
+                      children: [
+                        SizedBox(
+                          width: deviceWidth*.05,
+                        ),
+                        Container(
+                          width: deviceWidth * .90,
+                          height: deviceWidth * .1,
+                          decoration: BoxDecoration(
+                            border: Border(
+                              bottom: BorderSide(
+                                color: Colors.black54,
+                              ),
+                            ),
+                          ),
+                          child: Center(
+                              child: TextFormField(
+                                cursorColor: Colors.grey,
+                                controller: nameController,
+                                style: TextStyle(
+                                  fontSize: deviceWidth * .045,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                                decoration: InputDecoration.collapsed(
+                                  hintText: 'Name',
+                                ),
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                    SizedBox(
+                      height: deviceWidth*.05,
+                    ),
+                    Row(
+                      children: [
+                        SizedBox(
+                          width: deviceWidth*.05,
+                        ),
+                        Text( usernamevalid ? 'Username' : 'Username : this username is taken',
+                          style: TextStyle(
+                            color: usernamevalid ? Colors.grey : Colors.red,
+                            fontSize: usernamevalid ? deviceWidth *.045 : deviceWidth * 0.035,
+                            fontWeight: usernamevalid ? FontWeight.w400 : null,
+                            letterSpacing: 0.2,
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(
+                      height: deviceWidth*.015,
+                    ),
+                    Row(
+                      children: [
+                        SizedBox(
+                          width: deviceWidth*.05,
+                        ),
+                        Container(
+                          width: deviceWidth * .90,
+                          height: deviceWidth * .1,
+                          decoration: BoxDecoration(
+                            border: Border(
+                              bottom: BorderSide(
+                                color: Colors.black54,
+                              ),
+                            ),
+                          ),
+                          child: Center(
+                            child: TextField(
+                              onChanged: (text){
+                                checkusername() ;
+                              },
+                              cursorColor: Colors.grey,
+                              controller: usernameController,
+                              style: TextStyle(
+                                fontSize: deviceWidth * .045,
+                                fontWeight: FontWeight.w500,
+                              ),
+                              decoration: InputDecoration.collapsed(
+                                hintText: 'username',
+
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(
+                      height: deviceWidth*.05,
+                    ),
+                    Row(
+                      children: [
+                        SizedBox(
+                          width: deviceWidth*.05,
+                        ),
+                        Text('Bio',
+                          style: TextStyle(
+                            color: Colors.grey,
+                            fontSize: deviceWidth *.045,
+                            fontWeight: FontWeight.w400,
+                            letterSpacing: 0.2,
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(
+                      height: deviceWidth*.015,
+                    ),
+                    Row(
+                      children: [
+                        SizedBox(
+                          width: deviceWidth*.05,
+                        ),
+                        Container(
+                          width: deviceWidth * .90,
+                          height: deviceWidth * .1,
+                          decoration: BoxDecoration(
+                            border: Border(
+                              bottom: BorderSide(
+                                color: Colors.black54,
+                              ),
+                            ),
+                          ),
+                          child: Center(
+                            child: TextFormField(
+                              cursorColor: Colors.grey,
+                              controller: bioController,
+                              style: TextStyle(
+                                fontSize: deviceWidth * .045,
+                                fontWeight: FontWeight.w500,
+                              ),
+                              decoration: InputDecoration.collapsed(
+                                hintText: 'bio',
+                              ),
                             ),
                           ),
                         ),
                       ],
                     ),
                   ],
-                ),
-                SizedBox(
-                  height: deviceWidth*.05,
-                ),
-                Row(
-                  children: [
-                    SizedBox(
-                      width: deviceWidth*.05,
-                    ),
-                    Text('Name',
-                      style: TextStyle(
-                        color: Colors.grey,
-                        fontSize: deviceWidth *.045,
-                        fontWeight: FontWeight.w400,
-                        letterSpacing: 0.2,
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(
-                  height: deviceWidth*.015,
-                ),
-                Row(
-                  children: [
-                    SizedBox(
-                      width: deviceWidth*.05,
-                    ),
-                    Container(
-                      width: deviceWidth * .90,
-                      height: deviceWidth * .1,
-                      decoration: BoxDecoration(
-                        border: Border(
-                          bottom: BorderSide(
-                            color: Colors.black54,
-                          ),
-                        ),
-                      ),
-                      child: Center(
-                          child: TextFormField(
-                            cursorColor: Colors.grey,
-                            controller: nameController,
-                            style: TextStyle(
-                              fontSize: deviceWidth * .045,
-                              fontWeight: FontWeight.w500,
-                            ),
-                            decoration: InputDecoration.collapsed(
-                              hintText: 'Name',
-                            ),
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
-                SizedBox(
-                  height: deviceWidth*.05,
-                ),
-                Row(
-                  children: [
-                    SizedBox(
-                      width: deviceWidth*.05,
-                    ),
-                    Text( usernamevalid ? 'Username' : 'Username : this username is taken',
-                      style: TextStyle(
-                        color: usernamevalid ? Colors.grey : Colors.red,
-                        fontSize: usernamevalid ? deviceWidth *.045 : deviceWidth * 0.035,
-                        fontWeight: usernamevalid ? FontWeight.w400 : null,
-                        letterSpacing: 0.2,
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(
-                  height: deviceWidth*.015,
-                ),
-                Row(
-                  children: [
-                    SizedBox(
-                      width: deviceWidth*.05,
-                    ),
-                    Container(
-                      width: deviceWidth * .90,
-                      height: deviceWidth * .1,
-                      decoration: BoxDecoration(
-                        border: Border(
-                          bottom: BorderSide(
-                            color: Colors.black54,
-                          ),
-                        ),
-                      ),
-                      child: Center(
-                        child: TextField(
-                          onChanged: (text){
-                            checkusername() ;
-                          },
-                          cursorColor: Colors.grey,
-                          controller: usernameController,
-                          style: TextStyle(
-                            fontSize: deviceWidth * .045,
-                            fontWeight: FontWeight.w500,
-                          ),
-                          decoration: InputDecoration.collapsed(
-                            hintText: 'username',
-
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(
-                  height: deviceWidth*.05,
-                ),
-                Row(
-                  children: [
-                    SizedBox(
-                      width: deviceWidth*.05,
-                    ),
-                    Text('Bio',
-                      style: TextStyle(
-                        color: Colors.grey,
-                        fontSize: deviceWidth *.045,
-                        fontWeight: FontWeight.w400,
-                        letterSpacing: 0.2,
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(
-                  height: deviceWidth*.015,
-                ),
-                Row(
-                  children: [
-                    SizedBox(
-                      width: deviceWidth*.05,
-                    ),
-                    Container(
-                      width: deviceWidth * .90,
-                      height: deviceWidth * .1,
-                      decoration: BoxDecoration(
-                        border: Border(
-                          bottom: BorderSide(
-                            color: Colors.black54,
-                          ),
-                        ),
-                      ),
-                      child: Center(
-                        child: TextFormField(
-                          cursorColor: Colors.grey,
-                          controller: bioController,
-                          style: TextStyle(
-                            fontSize: deviceWidth * .045,
-                            fontWeight: FontWeight.w500,
-                          ),
-                          decoration: InputDecoration.collapsed(
-                            hintText: 'bio',
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
               ],
-              ),
             ),
-          ],
+          ),
         ),
-      ),
+        loading ? Scaffold(
+          backgroundColor: Colors.black.withOpacity(0.5),
+          body: Center(
+            child: CircularProgressIndicator(
+              color: Colors.white,
+            ),
+          ),
+        ) : Container()
+      ],
     );
   }
 

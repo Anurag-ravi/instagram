@@ -55,32 +55,26 @@ class _ProfileState extends State<Profile> {
   @override
   void initState() {
     // TODO: implement initState
-    init();
-    fetch();
     super.initState();
-    setState(() {
-      loading = false;
-    });
-  }
-
-  init() async {
-    SharedPreferences temp = await SharedPreferences.getInstance();
-    setState(() {
-      prefs = temp;
-    });
+    fetch();
   }
 
   Future<void> fetch() async {
+    SharedPreferences temp = await SharedPreferences.getInstance();
+    prefs = temp;
+    setState(() {
+      loading = true;
+    });
     if (widget.me) {
       
       if(prefs.getString('profile') != null){
         Map<String,dynamic> jsondatais = jsonDecode(prefs.getString('profile')!);
         setState(() {
           profile = ProfileModel.fromJson(jsondatais);
+          loading = false;
         });
       }
       if (await internetAvailable()){
-        
         String token = prefs.getString('token').toString();
         String? url = prefs.getString('url');
         final response = await http.get(
@@ -126,6 +120,9 @@ class _ProfileState extends State<Profile> {
         logout(context);
       }
     }
+    setState(() {
+      loading = false;
+    });
   }
 
   Future<void> follow() async {

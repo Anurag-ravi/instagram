@@ -30,6 +30,7 @@ class _FeedState extends State<Feed> {
   late ScrollController _scrollController;
   bool isFetching = false;
   double prevPageScroll = 0.0;
+  bool loading = false;
 
   
 
@@ -138,15 +139,22 @@ class _FeedState extends State<Feed> {
     setState(() {
       pagecount = 0;
       posts = [];
+      loading = true;
     });
     await fetchposts();
     await fetchmystories();
     await fetchstories();
+    setState(() {
+      loading = false;
+    });
   }
 
   @override
   void initState() {
     // TODO: implement initState
+    setState(() {
+      loading = true;
+    });
     _setupScrollController();
     fetchposts();
     fetchstories();
@@ -207,8 +215,9 @@ class _FeedState extends State<Feed> {
         body: Builder(
                 builder: (context) {
                   if (posts.isEmpty) {
-                    return const Center(
-                      child: Text('Follow people to populate feed'),
+                    return Center(
+                      child: loading ? Text("Loading...")
+                       : Text('Follow people to populate feed'),
                     );
                   }
     
