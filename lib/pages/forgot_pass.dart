@@ -21,6 +21,7 @@ class _Forgot_PasswordState extends State<Forgot_Password> {
   bool _email_valid = true;
   bool inputTextNotNull = false;
   String _email='';
+  bool loading = false;
 
   @override
   Widget build(BuildContext context) {
@@ -103,7 +104,15 @@ class _Forgot_PasswordState extends State<Forgot_Password> {
                           color: Color(buttonColor),
                           borderRadius: const BorderRadius.all(Radius.circular(5)),
                         ),
-                        child: Center(
+                        child: loading ? Center(
+                        child: SizedBox(
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                          ),
+                          height: deviceWidth * 0.08,
+                          width: deviceWidth * 0.08,
+                        ),
+                      ) : Center(
                           child: Text(
                             'Send Link',
                             style: TextStyle(
@@ -205,6 +214,7 @@ class _Forgot_PasswordState extends State<Forgot_Password> {
     FocusManager.instance.primaryFocus?.unfocus();
     setState(() {
       _email_valid = isValidEmail(_email);
+      loading = true;
     });
     if (_email_valid){
       SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -221,6 +231,9 @@ class _Forgot_PasswordState extends State<Forgot_Password> {
       );
       var data = jsonDecode(response.body);
       if(response.statusCode == 200){
+        setState(() {
+          loading = false;
+        });
         Navigator.push(context, MaterialPageRoute(builder: (builder) => Login(prefs: widget.prefs,)));
         var snackBar = SnackBar(
         content: Text(data['message']),
@@ -232,6 +245,9 @@ class _Forgot_PasswordState extends State<Forgot_Password> {
       content: Text(data['message']),
       );
       ScaffoldMessenger.of(context).showSnackBar(snackBar);
+      setState(() {
+        loading = false;
+      });
     }
   }
 

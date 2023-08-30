@@ -27,6 +27,7 @@ class _LoginState extends State<Login> {
   bool _email_valid = true;
   bool _pass_valid = true;
   String _email='', _password='';
+  bool loading = false;
 
   @override
   Widget build(BuildContext context) {
@@ -169,7 +170,15 @@ class _LoginState extends State<Login> {
                           color: Color(buttonColor),
                           borderRadius: const BorderRadius.all(Radius.circular(5)),
                         ),
-                        child: Center(
+                        child: loading ? Center(
+                        child: SizedBox(
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                          ),
+                          height: deviceWidth * 0.08,
+                          width: deviceWidth * 0.08,
+                        ),
+                      ) : Center(
                           child: Text(
                             'Log In',
                             style: TextStyle(
@@ -272,6 +281,7 @@ class _LoginState extends State<Login> {
     setState(() {
       _email_valid = isValidEmail(_email);
       _pass_valid = isValidPass(_password);
+      loading = true;
     });
     if (_email_valid && _pass_valid){
       SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -288,7 +298,6 @@ class _LoginState extends State<Login> {
         })
       );
       var data = jsonDecode(response.body);
-      print(data);
       if(response.statusCode == 200){
         widget.prefs.setString('token', data['jwt']);
         widget.prefs.setString('username', data['username']);
@@ -299,12 +308,18 @@ class _LoginState extends State<Login> {
         );
         ScaffoldMessenger.of(context).showSnackBar(snackBar);
         Navigator.push(context, MaterialPageRoute(builder: (builder) => HomePage(prefs: widget.prefs,)));
+        setState(() {
+          loading = false;
+        });
         return;
       }
       var snackBar = SnackBar(
       content: Text(data['message']),
       );
       ScaffoldMessenger.of(context).showSnackBar(snackBar);
+      setState(() {
+        loading = false;
+      });
     }
   }
 

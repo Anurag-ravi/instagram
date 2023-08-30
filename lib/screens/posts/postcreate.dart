@@ -7,7 +7,6 @@ import 'package:image_picker/image_picker.dart';
 import 'package:instagram/components/cacheimage.dart';
 import 'package:instagram/screens/feedscreen.dart';
 import 'package:instagram/utilities/constants.dart';
-import 'package:instagram/utilities/logout.dart';
 import 'package:path/path.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;

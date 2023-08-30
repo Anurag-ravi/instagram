@@ -25,6 +25,7 @@ class _SignupState extends State<Signup> {
 
   bool inputTextNotNull = false;
   String _email = '', _password1 = '', _password2 = '';
+  bool loading = false;
 
   @override
   Widget build(BuildContext context) {
@@ -214,7 +215,15 @@ class _SignupState extends State<Signup> {
                                 borderRadius:
                                     const BorderRadius.all(Radius.circular(5)),
                               ),
-                              child: Center(
+                              child: loading ? Center(
+                                child: SizedBox(
+                                  child: CircularProgressIndicator(
+                                    color: Colors.white,
+                                  ),
+                                  height: deviceWidth * 0.08,
+                                  width: deviceWidth * 0.08,
+                                ),
+                              ) : Center(
                                 child: Text(
                                   'Sign up',
                                   style: TextStyle(
@@ -324,6 +333,9 @@ class _SignupState extends State<Signup> {
   }
 
   signup(String _email, String _password1, String _password2) async {
+    setState(() {
+      loading = true;
+    });
     FocusManager.instance.primaryFocus?.unfocus();
     setState(() {
       _email_valid = isValidEmail(_email);
@@ -346,6 +358,9 @@ class _SignupState extends State<Signup> {
       );
       var data = jsonDecode(response.body);
       if(response.statusCode == 201){
+        setState(() {
+          loading = false;
+        });
         Navigator.push(context, MaterialPageRoute(builder: (builder) => Login(prefs: widget.prefs,)));
         var snackBar = SnackBar(
         content: Text(data['message']),
@@ -357,6 +372,9 @@ class _SignupState extends State<Signup> {
       content: Text(data['message']),
       );
       ScaffoldMessenger.of(context).showSnackBar(snackBar);
+      setState(() {
+        loading = false;
+      });
     }
   }
 

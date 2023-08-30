@@ -24,6 +24,7 @@ class ProfileCard extends StatefulWidget {
 
 class _ProfileCardState extends State<ProfileCard> {
   late SharedPreferences prefs;
+  bool loading = false;
 
   @override
   void initState() {
@@ -40,6 +41,9 @@ class _ProfileCardState extends State<ProfileCard> {
   }
 
   Future<void> follow() async {
+      setState(() {
+        loading = true;
+      });
       SharedPreferences prefs =
       await SharedPreferences.getInstance();
       String? token = prefs.getString('token');
@@ -52,12 +56,18 @@ class _ProfileCardState extends State<ProfileCard> {
           widget.profile.following = !widget.profile.following;
         });
         settoken(response);
+        setState(() {
+          loading = false;
+        });
         return;
       }
       if (response.statusCode == 401) {
         logout(context);
         return;
       }
+      setState(() {
+        loading = false;
+      });
   }
 
   
@@ -98,7 +108,16 @@ class _ProfileCardState extends State<ProfileCard> {
               color: widget.profile.following ? Colors.transparent : Colors.blue,
               border: widget.profile.following ? Border.all(color:secondaryColor(context),width: 0) : null
             ),
-            child: Center(
+            child: loading ?
+            Center(
+              child: SizedBox(
+                child: CircularProgressIndicator(
+                  color: widget.profile.following ? Colors.blue : Colors.white,
+                ),
+                height: deviceWidth * 0.05,
+                width: deviceWidth * 0.05,
+              ),
+            ) : Center(
               child: Text(
                 widget.profile.following ? 'Following' : widget.issuggestion ? widget.profile2.followsMe ? 'Follow back' : 'Follow' : 'Follow',
                 style: TextStyle(

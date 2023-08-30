@@ -19,8 +19,12 @@ class FollowCard extends StatefulWidget {
 
 class _FollowCardState extends State<FollowCard> {
   late SharedPreferences prefs;
+  bool loading = false;
 
   Future<void> follow() async {
+      setState(() {
+        loading = true;
+      });
       String? token = prefs.getString('token');
       String? url = prefs.getString('url');
       final response = await http.post(Uri.parse("${url!}user/follow/"),
@@ -31,12 +35,18 @@ class _FollowCardState extends State<FollowCard> {
           widget.profile.following = !widget.profile.following;
         });
         settoken(response);
+        setState(() {
+          loading = false;
+        });
         return;
       }
       if (response.statusCode == 401) {
         logout(context);
         return;
       }
+      setState(() {
+        loading = false;
+      });
   }
 
   @override
@@ -115,7 +125,16 @@ class _FollowCardState extends State<FollowCard> {
                 color: widget.profile.following ? Colors.transparent : Colors.blue,
                 border: widget.profile.following ? Border.all(color:secondaryColor(context),width: 0) : null
               ),
-              child: Center(
+              child: loading ? 
+              Center(
+                child: SizedBox(
+                  child: CircularProgressIndicator(
+                    color: widget.profile.following ? Colors.blue : Colors.white,
+                  ),
+                  height: deviceWidth * 0.05,
+                  width: deviceWidth * 0.05,
+                ),
+              ) : Center(
                 child: Text(
                   widget.profile.following ? 'Following'  : widget.profile.followsMe ? 'Follows You' : 'Follow',
                   style: TextStyle(

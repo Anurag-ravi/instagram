@@ -29,11 +29,11 @@ class _FollowersState extends State<Followers> with SingleTickerProviderStateMix
   List<FollowModel> following = [];
   List<SuggestionModel> suggestion = [];
   late SharedPreferences prefs;
+  bool loading = true;
 
 
   @override
   void initState() {
-    init();
     fetchFollowers();
     _tabController = TabController(length: widget.me ? 2 :4, initialIndex: widget.initialIndex, vsync: this)
       ..addListener(() {
@@ -41,17 +41,14 @@ class _FollowersState extends State<Followers> with SingleTickerProviderStateMix
       });
     super.initState();
   }
-  init() async {
+
+  Future<void> fetchFollowers() async {
+    setState(() {
+      loading = true;
+    });
     SharedPreferences temp = await SharedPreferences.getInstance();
     setState(() {
       prefs = temp;
-    });
-  }
-
-  Future<void> fetchFollowers() async {
-    var temp =  await SharedPreferences.getInstance();
-    setState(() {
-       prefs = temp;
     });
       String? token = prefs.getString('token');
       String? url = prefs.getString('url');
@@ -74,6 +71,9 @@ class _FollowersState extends State<Followers> with SingleTickerProviderStateMix
           suggestion = (data['suggestion'] as List).map((e) => SuggestionModel.fromJson(e)).toList();
         });
         settoken(response);
+        setState(() {
+          loading = false;
+        });
         return;
       }
       if (response.statusCode == 401) {
@@ -84,13 +84,23 @@ class _FollowersState extends State<Followers> with SingleTickerProviderStateMix
       content: Text('Some Error occured 🥲'),
       );
       ScaffoldMessenger.of(context).showSnackBar(snackBar);
+      setState(() {
+        loading = false;
+      });
   }
 
 
   @override
   Widget build(BuildContext context) {
     double devicewidth = MediaQuery.of(context).size.width;
-    return Scaffold(
+    return loading ? Scaffold(
+      body: Center(
+        child: CircularProgressIndicator(
+          color: secondaryColor(context),
+        ),
+      )
+    )
+    : Scaffold(
       backgroundColor: primaryColor(context),
       appBar: AppBar(
         title: Text(widget.me ? prefs.getString('username')! : widget.username,style: TextStyle(color: secondaryColor(context)),),

@@ -34,6 +34,8 @@ class _ProfileState extends State<Profile> {
   bool following = true;
   bool isvisible = false;
   bool loading = true;
+  bool loading2 = false;
+  bool loading3 = false;
   List<SuggestionModel> suggestions = [];
   late SharedPreferences prefs;
   ProfileModel profile = ProfileModel(
@@ -126,7 +128,9 @@ class _ProfileState extends State<Profile> {
   }
 
   Future<void> follow() async {
-    
+      setState(() {
+        loading2 = true;
+      });
       String? token = prefs.getString('token');
       String? url = prefs.getString('url');
       final response = await http.post(Uri.parse("${url!}user/follow/"),
@@ -137,6 +141,9 @@ class _ProfileState extends State<Profile> {
           profile.meFollowing = !profile.meFollowing;
         });
         settoken(response);
+        setState(() {
+          loading2 = false;
+        });
         return;
       }
       if (response.statusCode == 401) {
@@ -147,6 +154,9 @@ class _ProfileState extends State<Profile> {
       content: Text('Some Error occured 🥲'),
       );
       ScaffoldMessenger.of(context).showSnackBar(snackBar);
+      setState(() {
+        loading2 = false;
+      });
   }
 
   @override
@@ -544,7 +554,15 @@ class _ProfileState extends State<Profile> {
                             borderRadius:
                                 const BorderRadius.all(Radius.circular(7)),
                           ),
-                          child: Center(
+                          child: loading2 ? Center(
+                        child: SizedBox(
+                          child: CircularProgressIndicator(
+                            color: profile.meFollowing ? Colors.blue : Colors.white,
+                          ),
+                          height: deviceWidth * 0.05,
+                          width: deviceWidth * 0.05,
+                        ),
+                      ) : Center(
                             child: Text(
                               profile.meFollowing ? 'Following' : 'Follow',
                               style: TextStyle(
@@ -590,6 +608,9 @@ class _ProfileState extends State<Profile> {
                 ),
                 GestureDetector(
                   onTap: () async {
+                    setState(() {
+                      loading3 = true;
+                    });
                     if(!isvisible){
                       
                       String token = prefs.getString('token') as String;
@@ -609,6 +630,7 @@ class _ProfileState extends State<Profile> {
                     }
                     setState(() {
                       isvisible = !isvisible;
+                      loading3 = false;
                     });
                   },
                   child: Container(
@@ -620,7 +642,15 @@ class _ProfileState extends State<Profile> {
                       ),
                       borderRadius: const BorderRadius.all(Radius.circular(7)),
                     ),
-                    child: Center(
+                    child: loading3 ? Center(
+                        child: SizedBox(
+                          child: CircularProgressIndicator(
+                            color: Colors.blue,
+                          ),
+                          height: deviceWidth * 0.05,
+                          width: deviceWidth * 0.05,
+                        ),
+                      ) : Center(
                       child: Icon(
                         isvisible
                             ? Icons.keyboard_arrow_up
