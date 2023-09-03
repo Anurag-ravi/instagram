@@ -50,11 +50,11 @@ class _ActivityState extends State<Activity> {
             children: [
               SizedBox(height: deviceWidth * .02,),
               Text(
-                'Activity',
+                'Activity(Feature coming Soon)',
                 style: TextStyle(
                   color: Colors.black,
                   fontWeight: FontWeight.w600,
-                  fontSize: deviceWidth * 0.07,
+                  fontSize: deviceWidth * 0.05,
                   fontFamily: 'arial',
                   letterSpacing: 1,
                 ),

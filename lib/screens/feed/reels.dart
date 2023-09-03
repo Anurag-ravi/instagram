@@ -21,7 +21,7 @@ class Reels extends StatelessWidget {
             children: [
               Flexible(
                 child: Text(
-                  'Itna\naata to\nZuku\nbhaiya\ndeal kr\nchuke\nhote\n😏',
+                  'Feature\nComing\nSoon',
                   style: TextStyle(
                       fontFamily: 'Roboto',
                       fontSize: 50,

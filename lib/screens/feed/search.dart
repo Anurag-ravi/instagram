@@ -183,7 +183,6 @@ class _SearchState extends State<Search> with SingleTickerProviderStateMixin {
                     ListView.builder(
                       itemCount: suggestions.length,
                       itemBuilder: (context, index) {
-                        var item = suggestions[index];
                         return ProfileCard(profile: FollowModel('', '', 'name', false),profile2: suggestions[index],issuggestion: true,);
                       },
                     ),

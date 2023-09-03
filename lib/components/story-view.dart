@@ -1,7 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:instagram/components/cacheimage.dart';
-import 'package:instagram/main.dart';
 import 'package:instagram/models/story_model.dart';
 import 'package:instagram/models/user_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';

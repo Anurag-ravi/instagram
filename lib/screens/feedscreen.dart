@@ -36,7 +36,7 @@ class _FeedScreenState extends State<FeedScreen> {
       body: currIndex == 0 ? Feed(controller: widget.controller,prefs: widget.prefs,) :
       currIndex == 1 ? Search() :
       currIndex == 2 ? Reels() :
-      currIndex == 3 ? Reels() :
+      currIndex == 3 ? Activity() :
                        Profile(me: true,),
       bottomNavigationBar: Container(
         height: deviceWidth * 0.18,

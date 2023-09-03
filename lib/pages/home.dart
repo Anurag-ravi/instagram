@@ -15,14 +15,13 @@ class _HomePageState extends State<HomePage> {
   final _controller = PageController(initialPage: 1);
   @override
   Widget build(BuildContext context) {
-    double deviceWidth = MediaQuery.of(context).size.width;
     return Scaffold(
       body: PageView(
         controller: _controller,
         children: [
           const CameraScreen(),
           FeedScreen(controller: _controller,prefs: widget.prefs,),
-          DmScreen(controller: _controller,),
+          DmScreen(controller: _controller,prefs: widget.prefs),
         ],
       ),
     );

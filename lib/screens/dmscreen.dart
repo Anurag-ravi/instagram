@@ -1,21 +1,86 @@
 // ignore_for_file: prefer_const_constructors
 
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:instagram/components/cacheimage.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
+import '../models/followmodel.dart';
+import '../models/profile.dart';
+import '../utilities/logout.dart';
 
 class DmScreen extends StatefulWidget {
-  const DmScreen({Key? key, required this.controller}) : super(key: key);
+  const DmScreen({Key? key, required this.controller, required this.prefs}) : super(key: key);
   final PageController controller;
+  final SharedPreferences prefs;
   @override
   State<DmScreen> createState() => _DmScreenState();
 }
 
 class _DmScreenState extends State<DmScreen> {
-  bool verified = true;
+  bool verified = false;
+  bool loading = true;
+  late ProfileModel profile;
+  List<FollowModel> following = [];
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    fetchFollowers();
+  }
+
+  Future<void> fetchFollowers() async {
+      setState(() {
+        loading = true;
+      });
+      if(widget.prefs.getString('profile') != null){
+        Map<String,dynamic> jsondatais = jsonDecode(widget.prefs.getString('profile')!);
+        setState(() {
+          profile = ProfileModel.fromJson(jsondatais);
+          verified = profile.verified;
+        });
+      }
+      String? token = widget.prefs.getString('token');
+      String? url = widget.prefs.getString('url');
+      http.Response response = await http.get(Uri.parse("${url!}user/get_followers/"),
+          headers: <String, String>{'Authorization': token!},
+          );
+      if (response.statusCode == 200) {
+        var data = jsonDecode(jsonDecode(response.body));
+        setState(() {
+          following = (data['following'] as List).map((e) => FollowModel.fromJson(e)).toList();
+        });
+        settoken(response);
+        setState(() {
+          loading = false;
+        });
+        return;
+      }
+      if (response.statusCode == 401) {
+        logout(context);
+        return;
+      }
+      const snackBar = SnackBar(
+      content: Text('Some Error occured 🥲'),
+      );
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+      setState(() {
+        loading = false;
+      });
+  }
+
   @override
   Widget build(BuildContext context) {
     double deviceWidth = MediaQuery.of(context).size.width;
-
-    return Scaffold(
+    return loading ? Scaffold(
+      body: Center(
+        child: CircularProgressIndicator(
+          color: Colors.black,
+        ),
+      ),
+    ) : Scaffold(
       appBar: AppBar(
         backgroundColor: new Color(0xfff8faf8),
         elevation: 0.0,
@@ -28,9 +93,9 @@ class _DmScreenState extends State<DmScreen> {
               ),
               Row(
                 children: [
-                  const Flexible(
+                  Flexible(
                     child: Text(
-                      'anu.rag__r n n n n n nn n n n n n  n nn  nn',
+                      profile.username,
                       style: TextStyle(
                         color: Colors.black,
                         fontWeight: FontWeight.w700,
@@ -132,16 +197,21 @@ class _DmScreenState extends State<DmScreen> {
             SliverList(
               delegate: SliverChildListDelegate(
                 List.generate(
-                  17,
+                  following.length,
                   (int index) {
                     return GestureDetector(
                       child: ListTile(
-                        leading: CircleAvatar(
-                          backgroundImage: AssetImage("assets/avatar.png"),
-                          radius: deviceWidth * 0.08,
+                        leading: ClipOval(
+                          child: Container(
+                            width: deviceWidth * 0.14,
+                            height: deviceWidth * 0.14,
+                            child: following[index].dp != ''
+                              ? ChachedImage(url: following[index].dp,prefs: widget.prefs,)
+                              : Image.asset('assets/avatar.png'),
+                          ),
                         ),
                         title: Text(
-                          'name',
+                          following[index].name == "" ? following[index].username : following[index].name,
                           style: TextStyle(
                             fontSize: deviceWidth * 0.041,
                           ),

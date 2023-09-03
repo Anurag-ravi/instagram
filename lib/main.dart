@@ -1,6 +1,7 @@
 // import 'dart:io';
 
 import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:instagram/pages/home.dart';
 import 'package:instagram/pages/login.dart';
@@ -24,7 +25,9 @@ Future<void> main() async {
 
 void _performBackgroundTask(SharedPreferences prefs) async {
   // Make an HTTP request and process the response
-  final response = await http.get(Uri.parse('https://url-resolver.onrender.com/insta_backend'));
+  prefs.setString('url', "https://ibackend.cseiitg.tech/");
+  prefs.setString('media', "https://ibackend.cseiitg.tech");
+  final response = await http.get(Uri.parse('https://url-resolver-79q4.onrender.com/insta_backend'));
   if (response.statusCode == 200) {
     String url = JsonDecoder().convert(response.body)['url'];
     prefs.setString('url', url+'/');

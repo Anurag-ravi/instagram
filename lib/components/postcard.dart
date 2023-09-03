@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:instagram/components/cacheimage.dart';
@@ -702,9 +700,7 @@ class _HeartAnimationWidgetState extends State<HeartAnimationWidget> with Single
     await controller.forward();
     await controller.reverse();
 
-    if( widget.onEnd != null){
-      widget.onEnd();
-    }
+    widget.onEnd();
   }
 
   @override

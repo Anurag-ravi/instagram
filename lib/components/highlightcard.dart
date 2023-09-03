@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 
 class HighlightCard extends StatelessWidget {
-  const HighlightCard({Key? key}) : super(key: key);
-
+  const HighlightCard({Key? key,required this.name,required this.img}) : super(key: key);
+  final String name;
+  final String img;
   @override
   Widget build(BuildContext context) {
     double deviceWidth = MediaQuery.of(context).size.width;
@@ -33,8 +34,8 @@ class HighlightCard extends StatelessWidget {
               Container(
                 width: deviceWidth * 0.17,
                 height: deviceWidth * 0.17,
-                child: const CircleAvatar(
-                    backgroundImage: AssetImage('assets/avatar.png')),
+                child: CircleAvatar(
+                    backgroundImage: AssetImage(img)),
               ),
               FloatingActionButton(
                 onPressed: () {},
@@ -44,7 +45,7 @@ class HighlightCard extends StatelessWidget {
             ],
           ),
           Text(
-            'hhhhhhh',
+            name,
             textAlign: TextAlign.center,
             style: TextStyle(fontSize: deviceWidth * 0.03),
           ),

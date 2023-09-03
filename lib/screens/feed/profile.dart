@@ -723,12 +723,16 @@ class _ProfileState extends State<Profile> {
               child: ListView(
                 scrollDirection: Axis.horizontal,
                 padding: EdgeInsets.symmetric(horizontal: deviceWidth * 0.02),
-                children: List.generate(
-                  10,
-                  (int index) {
-                    return HighlightCard();
-                  },
-                ),
+                children: [
+                  HighlightCard(name: "Feature", img: 'assets/p1.jpg'),
+                  HighlightCard(name: "Yet", img: 'assets/p2.jpg'),
+                  HighlightCard(name: "To", img: 'assets/p3.jpg'),
+                  HighlightCard(name: "Come", img: 'assets/p4.jpg'),
+                  HighlightCard(name: "Feature", img: 'assets/p1.jpg'),
+                  HighlightCard(name: "Yet", img: 'assets/p2.jpg'),
+                  HighlightCard(name: "To", img: 'assets/p3.jpg'),
+                  HighlightCard(name: "Come", img: 'assets/p4.jpg'),
+                ],
               ),
             ),
             SizedBox(

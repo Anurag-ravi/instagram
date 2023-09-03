@@ -5,10 +5,9 @@ class CameraScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    double deviceWidth = MediaQuery.of(context).size.width;
     return const Scaffold(
       body: Center(
-        child: Text('camera screen'),
+        child: Text('camera screen, coming soon'),
       ),
     );
   }

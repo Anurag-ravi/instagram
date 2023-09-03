@@ -2,9 +2,9 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "Anurag's Instagram"
-#define MyAppVersion "1.0.0"
+#define MyAppVersion "1.2.0"
 #define MyAppPublisher "Anurag"
-#define MyAppURL "https://insta.anuragravi.tech/"
+#define MyAppURL "https://ifront.netlify.app/"
 #define MyAppExeName "instagram.exe"
 #define MyAppAssocName MyAppName + " File"
 #define MyAppAssocExt ".myp"
